@@ -2,8 +2,27 @@
 **Development guideline adalah dokumen berisi tata cara, dokumentasi yang isinya berdasarkan ide dari semua anggota team, di-maintenance oleh tech lead, dan disetujui oleh seluruh anggota team dengan tujuan agar setiap anggota dalam satu team memiliki pandangan yang sama terkait bagaimana project ini akan berjalan.**
 
 ## [TODO] Table of Contents  
-## [TODO] Get Started
+## Get Started
+``` bash
+# copy .env.example ke .env
+$ cp .env.example .env
+# jangan lupa untuk edit lagi file .env menyesuaikan konfigurasi database postgresql di server masing2
 
+# install packages
+$ npm install
+
+# buat database dari konfigurasi
+$ sequelize db:create
+
+# migrasi tabel
+$ sequelize db:migrate
+
+# seeding dummy data & default data
+$ sequelize db:seed
+
+# jalankan api pada local server anda :
+$ npm run dev
+```
 ## [WIP] Gitlab Workflow
 1. Pindahkan issue yang sudah di-assign ke kamu dari card `current sprint` ke card `doing`
    
