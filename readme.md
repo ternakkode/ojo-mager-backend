@@ -105,4 +105,96 @@ $ npm run dev
 - [WIP] Folder `routes` digunakan untuk menyimpan endpoint pada project.
 - Folder `utils` digunakan untuk menyimpan helpers yang memperlukan dependencies lain. contohnya adalah format response API pada semua endpoint sama, maka dari itu kita membuat utils untuk merubah 2 parameter yang diberikan menjadi sebuah object yang sesuai dengan standart yang sudah ditentukan diawal.
 
+## [WIP] RESTful API Design
+
+### URL Design
+Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API melainkan gunakan kata kerja dan juga gunakan kata benda jamak.
+
+**Berikut ini adalah contoh penamaan yang baik :**
+- `/users/`
+- `/programs/`
+- `/articles`/
+- dll
+
+**Pada url kedua baru gunakan kata kerja & kebab-case, contoh :**
+- `/users/register`
+- `/users/login`
+- `/users/forgot-password`
+- `/users/verification`
+
+**Jika ingin membuat CRUD maka gunakan HTTP Method yang biasa digunakan pada REST API, contoh :**
+- GET `/users`, Untuk mengambil semua data user.
+- GET `/users/1`, Untuk mengambil data user dengan ID `1`
+- POST `/users`, Untuk membuat user baru
+- PUT `/photos/1`, Untuk merubah user dengan ID `1`
+- DELETE `/photos/1`, Untuk menghapus user dengan ID `1`
+
+### Response Format
+- Response sucess api dengan mengembalikan 1 data berupa object
+  
+  ```json
+  {
+    "success": true,
+    "message": "This is successful message",
+    "data": {
+        "id": 1,
+        "type": "articles",
+        "created_at": "2019-10-04 14:33"
+    }
+  }
+  ```
+
+- Response sucess api dengan mengembalikan beberapa data berupa array of object
+  
+  ```json
+  {
+    "success": true,
+    "message": "This is successful message",
+    "data": [
+        {
+            "id": 1,
+            "type": "articles",
+            "created_at": "2019-10-04 13:33"
+        },
+        {
+            "id": 2,
+            "type": "articles",
+            "created_at": "2019-10-04 14:33"
+        }
+    ]
+  }
+  ```
+
+- Response success api tanpa mengembalikan data apapun (hanya message)
+  
+  ```json
+  {
+    "success": true,
+    "message": "This is successful message",
+  }
+  ```
+
+- Response failed api normal
+  
+  ```json
+  {
+    "success": false,
+    "message": "Error xyz has occurred"
+  }
+  ```
+
+- Response failed api pada proses validasi request payload
+
+  ```json
+  {
+      "success": false,
+      "message": "Error xyz has occurred",
+      "errors": [
+          "The email must be a valid email",
+          "The password must be at least 6 chaarcters",
+          "The phone number is already used"
+      ],
+  }
+  ```
+
 ## [TODO] Coding Style
