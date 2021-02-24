@@ -30,7 +30,7 @@ const sendgrid = async (req, res, next) => {
     try {
         const { target } = req.body
 
-        const sendgridHelpers = new SendgridHelpers;
+        const sendgridHelpers = new SendgridHelpers();
         await sendgridHelpers.sendTextMail(
             target,
             'Contoh Title Email',

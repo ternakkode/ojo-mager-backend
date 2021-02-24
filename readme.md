@@ -28,7 +28,7 @@ $ npm run dev
    
     ![Move Card To Doing](./guideline/gitflow/move-card-to-doing.gif)
 1. Masuk kedalam local repository kamu, lalu pindah ke branch `development` dan selalu `pull` dari branch tersebut agar perubahan di local repository kamu mengikuti data terbaru.
-2. Buatlah branch baru dengan nama `features/features-name`. Buatlah branch yang benar-benar bisa menjelaskan fitur mana yang sedang kamu kerjakan, contoh : `features/login`, `features/lupa-password`.
+2. Buatlah branch baru dengan nama `feature/feature-name`. Buatlah branch yang benar-benar bisa menjelaskan fitur mana yang sedang kamu kerjakan, contoh : `feature/login`, `feature/forget-password`.
 3. Setiap commit yang kamu buat pastikan benar benar menjelaskan tentang apa yang kamu kerjakan.
   - Contoh commit yang baik : `Create endpoint login using jwt token`
   - Contoh commit yang buruk : `commit`, `firhan sudah`, `sudah selesai`, `login`, `kurang sedikit`.
@@ -52,6 +52,7 @@ $ npm run dev
 
 
 ## [WIP] Enviroment & Libaries
+- @sendgrid/mail
 - bcrypt
 - dotenv
 - express-validator
@@ -102,7 +103,7 @@ $ npm run dev
 - Folder `guideline` digunakan untuk menyimpan media yang diperlukan untuk membuat guideline ini (tidak berhubugnan dengan project).
 - Folder `helpers` digunakan untuk menyimpan shortcut dari **function** yang sering dipakai di beberapa tempat dan menggunakan dependency dari module lain. Contoh dari helpers adalah untuk membuat jwt token dari payload yang diberikan di parameter dan menggunakan libraries/module dari jsonwebtoken
 - Folder `middleware` digunakan untuk menyimpan semua middleware yang akan digunakan pada **REST API**. Contoh dari middleware adalah middleware untuk **validasi jwt token**, **error handling**.
-- [WIP] Folder `routes` digunakan untuk menyimpan endpoint pada project.
+- Folder `routes` digunakan untuk menyimpan endpoint pada project. Untuk detailnya silahkan cek di Coding Style bagian Controller & Route.
 - Folder `utils` digunakan untuk menyimpan helpers yang memperlukan dependencies lain. contohnya adalah format response API pada semua endpoint sama, maka dari itu kita membuat utils untuk merubah 2 parameter yang diberikan menjadi sebuah object yang sesuai dengan standart yang sudah ditentukan diawal.
 
 ## [WIP] RESTful API Design
@@ -113,12 +114,12 @@ Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API 
 **Berikut ini adalah contoh penamaan yang baik :**
 - `/users/`
 - `/programs/`
-- `/articles`/
+- `/articles/`
 - dll
 
 **Pada url kedua baru gunakan kata kerja & kebab-case, contoh :**
-- `/users/register`
-- `/users/login`
+- `/auth/register`
+- `/auth/login`
 - `/users/forgot-password`
 - `/users/verification`
 
@@ -197,4 +198,81 @@ Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API 
   }
   ```
 
-## [TODO] Coding Style
+## [WIP] Coding Style
+
+- **Route & Controller Flow**
+  ```javascript
+  // lokasi file : routes/api/index.js
+  const api = require('express').Router();
+  const errorHandlingApi = require('../../middleware/errorHandlingApi');
+  
+  /*
+  Taruh Routemu disini dengan aturan sebagai berikut : 
+  1. syntax api.use('/url', require('.nama-fitur/nama-fitur.route))
+  2. Urutkan sesuai abjad, jika route yang kamu buat diawali dengan huruf f dan ada route diawali huruf e maka route yang diawali huruf f diatas route yang diawali huruf e
+  3. 1 Route di file index.js tidak digunakan untuk 1 endpoint saja melainkan banyak endpoint, contoh :
+    a. Fitur login & register tidak perlu dibuatkan masing2 1 file disini melainkan cukup file auth saja lalu nanti fitur login & register bisa dimasukkan kedalam file auth/auth.route.js
+    b. Untuk kasus CRUD sama dengan kasus sebelumnya.
+  */
+  api.use('/example', require('./example/example.route'));
+  
+  api.use(errorHandlingApi);
+  
+  module.exports = api;  
+  ```
+
+  ```javascript
+  // contoh sub route untuk CRUD
+  // lokasi file : routes/api/nama-fitur/nama-fitur.js
+  const namaFiturRoute = require('express').Router();
+  const namaFiturController = require('./nama-fitur.controller');
+  
+  namaFiturRoute.get('/', namaFiturController.index);
+  namaFiturRoute.get('/:params', namaFiturController.detail);
+  namaFiturRoute.post('/', namaFiturController.create);
+  namaFiturRoute.put('/:params', namaFiturController.update);
+  namaFiturRoute.delete('/:params', namaFiturController.delete);
+
+  module.exports = namaFiturRoute;  
+  ```
+
+
+- **Controller Method** (Contohnya bisa dilihat pada folder routes/api/example.example.controller.js)
+  
+  ```javascript
+  /*
+  Terdapat module method yang harus selalu di require pada setiap controller file
+    1. ApiErrorHandler class dengan lokasi helpers/ApiErrorHandler.js
+    2. Method successApi dengan lokasi utils/response.js
+  */
+
+  // selalu buat function asynchronous
+  const controllerMethodName = async (req, res, next) => {
+    try {
+      // masukkan logic code
+      
+      // contoh error handling :
+      if (somethingIdontWantIsHappen) {
+        // ubah angka 400 menjadi http code sesuai jenis error yang terjadi
+        throw new ApiErrorHandler(400, "error message");
+      }
+
+      /* mengirim response ke user 
+      Keterangan : 
+       - http status tidak selalu 200, bisa 201 atau lainnya
+       - payload bisa diisi ataupun tidak, jadi kita tidak ada data yang dikirimkan cukup panggil utils successApi dengan 1 parameter, contoh : successApi("berhasil berhasil hore")
+      */
+      res.status(200).json(
+        successApi("pesan response", payload)
+      );
+    } catch (err) {
+      // kirimkan error untuk dihandle oleh error handling middleware
+      next(err);
+    }
+  }
+
+  // export all controller as an object :
+  module.exports {
+    controllerMethodName
+  }
+  ```
