@@ -6,16 +6,17 @@
 
 ## [WIP] Gitlab Workflow
 1. Pindahkan issue yang sudah di-assign ke kamu dari card `current sprint` ke card `doing`
-![Move Card To Doing](./guideline/gitflow/move-card-to-doing.gif)
-2. Masuk kedalam local repository kamu, lalu pindah ke branch `development` dan selalu `pull` dari branch tersebut agar perubahan di local repository kamu mengikuti data terbaru.
-3. Buatlah branch baru dengan nama `features/features-name`. Buatlah branch yang benar-benar bisa menjelaskan fitur mana yang sedang kamu kerjakan, contoh : `features/login`, `features/lupa-password`.
-4. Setiap commit yang kamu buat pastikan benar benar menjelaskan tentang apa yang kamu kerjakan.
+   
+    ![Move Card To Doing](./guideline/gitflow/move-card-to-doing.gif)
+1. Masuk kedalam local repository kamu, lalu pindah ke branch `development` dan selalu `pull` dari branch tersebut agar perubahan di local repository kamu mengikuti data terbaru.
+2. Buatlah branch baru dengan nama `features/features-name`. Buatlah branch yang benar-benar bisa menjelaskan fitur mana yang sedang kamu kerjakan, contoh : `features/login`, `features/lupa-password`.
+3. Setiap commit yang kamu buat pastikan benar benar menjelaskan tentang apa yang kamu kerjakan.
   - Contoh commit yang baik : `Create endpoint login using jwt token`
   - Contoh commit yang buruk : `commit`, `firhan sudah`, `sudah selesai`, `login`, `kurang sedikit`.
 5. Setelah kamu selesai silahkan pastikan tidak ada error di pekerjaanmu lalu `push` pekerjaan kamu ke remote repository dengan branch yang sama dengan branch yang kamu buat di local repository.
 6. Buatlah Merge Request dengan detail sebagai berikut :
 
- ![Field Merge Request](./guideline/gitflow/merge-request.gif)
+    ![Field Merge Request](./guideline/gitflow/merge-request.gif)
   
     - Title : nama fitur yang kamu kerjakan
     - Description : #kode issue, tambahkan penjelasan jika memang dibutuhkan
@@ -25,9 +26,9 @@
     - Label : bisa dikosongi (Jika Merge Requestnya Urgent silahkan tambahkan High Priority)
     - Merge Options : delete source branch when merge request is accepted
     
-  Setelah itu submit dan tunggu direview oleh maintainer
 7. Pindahkan issue kamu di board dari `doing` ke `need review` agar maintainer bisa mengecek merge request kamu dengan mudah.
-![Move Card To Need Review](./guideline/gitflow/move-card-to-need-review.gif)
+   
+    ![Move Card To Need Review](./guideline/gitflow/move-card-to-need-review.gif)
 8. Setelah itu selalu pantau issue board, jika `card` yang kamu buat pindah dari `need review` ke `done` maka pekerjaan kamu telah dianggap selesai, namun jika terpindah di `current sprint` dengan tambahan label `need revision` maka cek ulang `merge request` yang kamu buat atau hubungi maintainer untuk memastikan perbaikan seperti apa yang harus dilakukan.
 
 
