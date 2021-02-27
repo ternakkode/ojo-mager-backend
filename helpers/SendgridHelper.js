@@ -3,7 +3,7 @@ const sgMail = require('@sendgrid/mail');
 class SendgridHelper {
     constructor() {
         this.apikey = process.env.SENDGRID_APIKEY || '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';
-        this.sender = sender = 'no-reply@sportapps.co.id';
+        this.sender = 'no-reply@sportapps.co.id';
         sgMail.setApiKey(this.apikey);
     }
 
