@@ -138,10 +138,89 @@ const validateForgotPassword = async (req, res, next) => {
     }
 }
 
+const newVerificationAccount = async (req, res, next) => {
+    try {
+        const { user } = req;
+
+        if(!user) {
+            throw new ApiErrorHandler(400, "User not found");
+        }
+
+        if(user.is_verified) {
+            throw new ApiErrorHandler(400, "User already verified");
+        }
+
+        const generatedVerificationCode = cryptoHelper.generateRandomAccountCode('verification', user.email);
+
+        const existVerificationCode = await UserCode.findOne({
+            where: { user_id : user.id, type: 'verification' }
+        });
+        
+        if(!existVerificationCode) {
+            await UserCode.create({
+                id: nanoid(),
+                user_id: user.id,
+                type: 'verification',
+                code: generatedVerificationCode,
+                is_available: true
+            })
+        } else {
+            await UserCode.update({
+                code: generatedVerificationCode,
+                is_available: true
+            }, { where: { type: 'verification', user_id: user.id } });
+        }
+
+        const sendgridHelper = new SendgridHelper();
+        await sendgridHelper.sendTextMail(
+            user.email,
+            'Harap Verifikasi Akun Anda',
+            `Berikut ini adalah kode untuk verifikasi akun : ${generatedVerificationCode}`
+        );
+
+        res.json(
+            successApi('success send verificiation email')
+        );
+    } catch (err) {
+        next(err);
+    }
+}
+
+const verifyVerificationAccount = async (req, res, next) => {
+    try {
+        const { user } = req;
+        const { code } = req.body;
+        
+        const verificationCode = await UserCode.findOne({
+            where: { code, user_id: user.id }
+        })
+        
+        if(!verificationCode) { 
+            throw new ApiErrorHandler(400, "Verification code invalid");
+        }
+
+        await User.update({
+            is_verified: true,
+        }, { where: { id: user.id } });
+
+        await UserCode.update({
+            is_available: false
+        }, { where: { id: verificationCode.id } });
+
+        res.json(
+            successApi("succesfully verifiy account")
+        );
+    } catch (err) {
+        next(err);
+    }
+}
+
 module.exports = {
     register,
     login,
     newForgotPassword,
     saveNewForgotPassword,
-    validateForgotPassword
+    validateForgotPassword,
+    newVerificationAccount,
+    verifyVerificationAccount
 }
