@@ -1,8 +1,8 @@
 const { nanoid } = require("nanoid");
 
-const { User, UserCode } = require('../../../database/models');
+const { User, UserCode } = require('../../../database/models')
 const bcryptHelper = require('../../../helpers/bcrypt');
-const cryptoHelper = require('../../../helpers/crypto');
+const cryptoHelper = require('../../../helpers/crypto')
 const jwtHelper = require('../../../helpers/jwt');
 const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
 const SendgridHelper = require('../../../helpers/SendgridHelper');
@@ -59,7 +59,51 @@ const login = async (req, res, next) => {
 
 const newForgotPassword = async (req, res, next) => {
     try {
-        // masukkan logic codenya disini mas
+        const { email } = req.body
+        const forgotPasswordCode = "iuefbofbieubuiebieb"
+        
+        const user = await User.findOne({
+            where: { email }
+        })
+
+        if (!user) {
+            throw new ApiErrorHandler(400, "user not found")
+        }
+        
+        const userCode = await UserCode.findOne({
+            where: { user_id: user.id }
+        });
+        
+        if (!userCode) {
+            await UserCode.create({
+                id: nanoid(),
+                is_available: true,
+                code: forgotPasswordCode,
+                type: "forgot-password",
+                user_id: user.id
+            });
+        } else {
+            await UserCode.update({
+                code: forgotPasswordCode,
+                is_available: true
+            }, {
+                where: {
+                    user_id: user.id,
+                    type: "forgot-password"
+                }
+            })
+        }
+
+        const sendgridHelper = new SendgridHelper();
+        await sendgridHelper.sendTextMail(
+            email,
+            'Code lupa password',
+            `Ini Code lupa password kamu ya !, click untuk merubah password : ${forgotPasswordCode}`
+        );
+
+        res.json(
+            successApi('Berhasil Mengirim Email')
+        );
     } catch (err) {
         next(err);
     }
@@ -75,7 +119,20 @@ const saveNewForgotPassword = async (req, res, next) => {
 
 const validateForgotPassword = async (req, res, next) => {
     try {
-        // masukkan logic codenya disini mas
+        
+        const { code } = req.body;
+        const userCode = await UserCode.findOne({
+            where: { code }
+        })
+        if (!userCode) {
+            throw new ApiErrorHandler(400, "user not found");
+        }
+        res.json(
+            successApi('sucessully validate request password data', {
+                userCode,
+                code
+            })
+        );
     } catch (err) {
         next(err);
     }

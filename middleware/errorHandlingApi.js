@@ -5,14 +5,18 @@ const errorHandlingApi = async (err, req, res, next) => {
     if (err instanceof ApiErrorHandler) {
         const { statusCode, message, data } = err
         
-        res.status(statusCode).json(
+        return res.status(statusCode).json(
             failedApi(statusCode, message, data)
         );
-    } else {
-        res.status(500).json(
+    }
+    
+    if(process.env.NODE_ENV === 'production') {
+        return res.status(500).json(
             failedApi(500, "something went wrong")
         );
     }
+
+    next();
 }
 
 module.exports = errorHandlingApi;
