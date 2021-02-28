@@ -60,7 +60,7 @@ const login = async (req, res, next) => {
 const newForgotPassword = async (req, res, next) => {
     try {
         const { email } = req.body
-        const forgotPasswordCode = "iuefbofbieubuiebieb"
+        const forgotPasswordCode = cryptoHelper.generateRandomAccountCode('forgot-password', email);
         
         const user = await User.findOne({
             where: { email }
@@ -71,7 +71,7 @@ const newForgotPassword = async (req, res, next) => {
         }
         
         const userCode = await UserCode.findOne({
-            where: { user_id: user.id }
+            where: { user_id: user.id, type: "forgot-password" }
         });
         
         if (!userCode) {
@@ -95,7 +95,7 @@ const newForgotPassword = async (req, res, next) => {
         }
 
         const sendgridHelper = new SendgridHelper();
-        await sendgridHelper.sendTextMail(
+        sendgridHelper.sendTextMail(
             email,
             'Code lupa password',
             `Ini Code lupa password kamu ya !, click untuk merubah password : ${forgotPasswordCode}`
@@ -122,15 +122,25 @@ const saveNewForgotPassword = async (req, res, next) => {
             }
         });
 
-        if (!userCode) {
+        if (!userCode || !userCode.is_available) {
             throw new ApiErrorHandler(400, "User codes not valid")
-        } else {
-            await User.update({
-                password: encryptedPassword
-            }, {
-                where: { id: userCode.user_id }
-            })
-        };
+        }
+        
+        await User.update({
+            password: encryptedPassword
+        }, {
+            where: {
+                id: userCode.user_id
+            }
+        })
+
+        await UserCode.update({
+            is_available: false
+        }, {
+            where: {
+                code
+            }
+        })
 
         res.json(
             successApi('sucessfully update password')
@@ -148,7 +158,7 @@ const validateForgotPassword = async (req, res, next) => {
             where: { code }
         })
         if (!userCode) {
-            throw new ApiErrorHandler(400, "user not found");
+            throw new ApiErrorHandler(400, "code is invalid");
         }
         res.json(
             successApi('sucessully validate request password data', {
@@ -195,7 +205,7 @@ const newVerificationAccount = async (req, res, next) => {
         }
 
         const sendgridHelper = new SendgridHelper();
-        await sendgridHelper.sendTextMail(
+        sendgridHelper.sendTextMail(
             user.email,
             'Harap Verifikasi Akun Anda',
             `Berikut ini adalah kode untuk verifikasi akun : ${generatedVerificationCode}`
