@@ -111,7 +111,30 @@ const newForgotPassword = async (req, res, next) => {
 
 const saveNewForgotPassword = async (req, res, next) => {
     try {
-        // masukkan logic codenya disini mas
+        const { user_id, code, password } = req.body;
+        const encryptedPassword = await bcryptHelper.encryptPassword(password);
+
+        const userCode = await UserCode.findOne({
+            where: {
+                user_id,
+                code,
+                type: "forgot-password"
+            }
+        });
+
+        if (!userCode) {
+            throw new ApiErrorHandler(400, "User codes not valid")
+        } else {
+            await User.update({
+                password: encryptedPassword
+            }, {
+                where: { id: userCode.user_id }
+            })
+        };
+
+        res.json(
+            successApi('sucessfully update password')
+        );
     } catch (err) {
         next(err);
     }
