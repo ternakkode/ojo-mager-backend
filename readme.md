@@ -1,7 +1,5 @@
 # Mini Project Development Guideline
 **Development guideline adalah dokumen berisi tata cara, dokumentasi yang isinya berdasarkan ide dari semua anggota team, di-maintenance oleh tech lead, dan disetujui oleh seluruh anggota team dengan tujuan agar setiap anggota dalam satu team memiliki pandangan yang sama terkait bagaimana project ini akan berjalan.**
-
-## [TODO] Table of Contents  
 ## Get Started
 ``` bash
 # copy .env.example ke .env
@@ -63,8 +61,8 @@ $ npm run dev
 - pg
 - sequelize
   
-## [TODO] Database Schema
-
+## Database Schema
+![Move Card To Doing](./guideline/ERD.png)
 ## [WIP] Project Structure / File Grouping
 
 ### Visualisasi
@@ -276,3 +274,36 @@ Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API 
     controllerMethodName
   }
   ```
+
+  - **Validation Middleware**
+  
+    1. Buat file baru pada folder `helpers/validation/rules` sesuai fitur yang kamu buat. contoh : `users`
+    2. tambahankan kode `const { check } = require('express-validator');` pada bagian paling atas kode kamu.
+    3. Buat array baru untuk validation rules tiap endpoint yang kamu buat.
+    4. import validation rule helpers dan file `middleware/requestValidation` lalu tambahkan 2 middleware tersebut pada endpoint yang kamu buat.
+    5. Contoh penerapannya bisa kamu cek pada file `helpers/validation/rules/users.js` untuk contoh validation rulesnya dan `routes/api/users/users.route.js` untuk contoh penggunaannya sebagai middleware.
+    6. Jika kamu bingung validation rules apa saja yang bisa dimasukan berikut beberapa contoh umumnya : 
+        - Cek apakah data dikirimkan menggunakan method `notEmpty()`
+        - Cek apakah data dikirimkan dengan format string menggunakan method `isString()`
+        - Memastikan data dikirimkan adalah foreign key salah satu model : 
+          ```javascript
+            check('params').custom(params => {
+              return Model.findOne({
+                where: { email }
+              }).then(user => {
+                if (user) {
+                  return Promise.reject('e-mail already in use');
+                }
+              });
+            })
+          ```
+
+  - **Database & Model Design**
+    - Penamaan Table : lowercase, snake_case, plural. contoh :
+      - `users`
+      - `user_code`
+      - `articles`
+    - Penamaan ORM Model : SentenceCase, singular. contoh :
+      - `User`
+      - `UserCode`
+      - `Article`
