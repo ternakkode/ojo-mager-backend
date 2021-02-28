@@ -95,7 +95,7 @@ const newForgotPassword = async (req, res, next) => {
         }
 
         const sendgridHelper = new SendgridHelper();
-        await sendgridHelper.sendTextMail(
+        sendgridHelper.sendTextMail(
             email,
             'Code lupa password',
             `Ini Code lupa password kamu ya !, click untuk merubah password : ${forgotPasswordCode}`
@@ -205,7 +205,7 @@ const newVerificationAccount = async (req, res, next) => {
         }
 
         const sendgridHelper = new SendgridHelper();
-        await sendgridHelper.sendTextMail(
+        sendgridHelper.sendTextMail(
             user.email,
             'Harap Verifikasi Akun Anda',
             `Berikut ini adalah kode untuk verifikasi akun : ${generatedVerificationCode}`
