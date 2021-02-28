@@ -60,7 +60,7 @@ const login = async (req, res, next) => {
 const newForgotPassword = async (req, res, next) => {
     try {
         const { email } = req.body
-        const forgotPasswordCode = "iuefbofbieubuiebieb"
+        const forgotPasswordCode = cryptoHelper.generateRandomAccountCode('forgot-password', user.email);
         
         const user = await User.findOne({
             where: { email }
