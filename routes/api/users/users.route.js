@@ -1,10 +1,51 @@
 const usersRoute = require('express').Router();
-const usersController = require('./users.controller');
 
-usersRoute.post('/register', usersController.register);
-usersRoute.post('/login', usersController.login);
-usersRoute.post('/forgot-password/new', usersController.newForgotPassword);
-usersRoute.get('/forgot-password/save', usersController.saveNewForgotPassword)
-usersRoute.post('/forgot-password/validate', usersController.validateForgotPassword);
+const usersController = require('./users.controller');
+const usersValidationRule = require('../../../helpers/validation/rules/users');
+const requestValidationMiddleware = require('../../../middleware/requestValidation');
+const jwtMiddleware = require('../../../middleware/jwtPassport');
+
+usersRoute.post(
+    '/register', 
+    usersValidationRule.register,
+    requestValidationMiddleware,
+    usersController.register
+);
+usersRoute.post(
+    '/login',
+    usersValidationRule.login,
+    requestValidationMiddleware, 
+    usersController.login
+);
+usersRoute.post(
+    '/forgot-password/new',
+    usersValidationRule.newForgotPassword,
+    requestValidationMiddleware, 
+    usersController.newForgotPassword
+);
+usersRoute.post(
+    '/forgot-password/save', 
+    usersValidationRule.saveForgotPassword,
+    requestValidationMiddleware, 
+    usersController.saveNewForgotPassword
+);
+usersRoute.post(
+    '/forgot-password/validate', 
+    usersValidationRule.validateForgotPassword,
+    requestValidationMiddleware,
+    usersController.validateForgotPassword
+);
+usersRoute.post(
+    '/verification/new', 
+    jwtMiddleware, 
+    usersController.newVerificationAccount
+);
+usersRoute.post(
+    '/verification/verify', 
+    usersValidationRule.verifyVerification,
+    requestValidationMiddleware,
+    jwtMiddleware, 
+    usersController.verifyVerificationAccount
+);
 
 module.exports = usersRoute;

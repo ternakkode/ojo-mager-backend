@@ -60,7 +60,7 @@ const login = async (req, res, next) => {
 const newForgotPassword = async (req, res, next) => {
     try {
         const { email } = req.body
-        const forgotPasswordCode = "iuefbofbieubuiebieb"
+        const forgotPasswordCode = cryptoHelper.generateRandomAccountCode('forgot-password', email);
         
         const user = await User.findOne({
             where: { email }
@@ -71,7 +71,7 @@ const newForgotPassword = async (req, res, next) => {
         }
         
         const userCode = await UserCode.findOne({
-            where: { user_id: user.id }
+            where: { user_id: user.id, type: "forgot-password" }
         });
         
         if (!userCode) {
@@ -95,7 +95,7 @@ const newForgotPassword = async (req, res, next) => {
         }
 
         const sendgridHelper = new SendgridHelper();
-        await sendgridHelper.sendTextMail(
+        sendgridHelper.sendTextMail(
             email,
             'Code lupa password',
             `Ini Code lupa password kamu ya !, click untuk merubah password : ${forgotPasswordCode}`
@@ -111,7 +111,40 @@ const newForgotPassword = async (req, res, next) => {
 
 const saveNewForgotPassword = async (req, res, next) => {
     try {
-        // masukkan logic codenya disini mas
+        const { user_id, code, password } = req.body;
+        const encryptedPassword = await bcryptHelper.encryptPassword(password);
+
+        const userCode = await UserCode.findOne({
+            where: {
+                user_id,
+                code,
+                type: "forgot-password"
+            }
+        });
+
+        if (!userCode || !userCode.is_available) {
+            throw new ApiErrorHandler(400, "User codes not valid")
+        }
+        
+        await User.update({
+            password: encryptedPassword
+        }, {
+            where: {
+                id: userCode.user_id
+            }
+        })
+
+        await UserCode.update({
+            is_available: false
+        }, {
+            where: {
+                code
+            }
+        })
+
+        res.json(
+            successApi('sucessfully update password')
+        );
     } catch (err) {
         next(err);
     }
@@ -125,7 +158,7 @@ const validateForgotPassword = async (req, res, next) => {
             where: { code }
         })
         if (!userCode) {
-            throw new ApiErrorHandler(400, "user not found");
+            throw new ApiErrorHandler(400, "code is invalid");
         }
         res.json(
             successApi('sucessully validate request password data', {
@@ -138,10 +171,89 @@ const validateForgotPassword = async (req, res, next) => {
     }
 }
 
+const newVerificationAccount = async (req, res, next) => {
+    try {
+        const { user } = req;
+
+        if(!user) {
+            throw new ApiErrorHandler(400, "User not found");
+        }
+
+        if(user.is_verified) {
+            throw new ApiErrorHandler(400, "User already verified");
+        }
+
+        const generatedVerificationCode = cryptoHelper.generateRandomAccountCode('verification', user.email);
+
+        const existVerificationCode = await UserCode.findOne({
+            where: { user_id : user.id, type: 'verification' }
+        });
+        
+        if(!existVerificationCode) {
+            await UserCode.create({
+                id: nanoid(),
+                user_id: user.id,
+                type: 'verification',
+                code: generatedVerificationCode,
+                is_available: true
+            })
+        } else {
+            await UserCode.update({
+                code: generatedVerificationCode,
+                is_available: true
+            }, { where: { type: 'verification', user_id: user.id } });
+        }
+
+        const sendgridHelper = new SendgridHelper();
+        sendgridHelper.sendTextMail(
+            user.email,
+            'Harap Verifikasi Akun Anda',
+            `Berikut ini adalah kode untuk verifikasi akun : ${generatedVerificationCode}`
+        );
+
+        res.json(
+            successApi('success send verificiation email')
+        );
+    } catch (err) {
+        next(err);
+    }
+}
+
+const verifyVerificationAccount = async (req, res, next) => {
+    try {
+        const { user } = req;
+        const { code } = req.body;
+        
+        const verificationCode = await UserCode.findOne({
+            where: { code, user_id: user.id }
+        })
+        
+        if(!verificationCode) { 
+            throw new ApiErrorHandler(400, "Verification code invalid");
+        }
+
+        await User.update({
+            is_verified: true,
+        }, { where: { id: user.id } });
+
+        await UserCode.update({
+            is_available: false
+        }, { where: { id: verificationCode.id } });
+
+        res.json(
+            successApi("succesfully verifiy account")
+        );
+    } catch (err) {
+        next(err);
+    }
+}
+
 module.exports = {
     register,
     login,
     newForgotPassword,
     saveNewForgotPassword,
-    validateForgotPassword
+    validateForgotPassword,
+    newVerificationAccount,
+    verifyVerificationAccount
 }
