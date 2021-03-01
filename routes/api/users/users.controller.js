@@ -22,6 +22,8 @@ const register = async (req, res, next) => {
             is_verified: false
         });
 
+        user.password = password;
+
         res.json(
             successApi('sucessfully register', user)
         );
@@ -48,7 +50,8 @@ const login = async (req, res, next) => {
         }
 
         const token = jwtHelper.generateJwtToken(user.id)
-
+        user.password = password;
+        
         res.json(
             successApi('sucessfully login', { user, token })
         );
