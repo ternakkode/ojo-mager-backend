@@ -29,11 +29,17 @@ const create = async (req, res, next) => {
 
 const index = async (req, res, next) => {
     try {
-        const { title, category } = req.query;
+        const { title, category, limit } = req.query;
         
         let params = {}
+        
+        params.include = {
+            model: ArticleCategory,
+            as: 'category'
+        }
+
         if (title || category) {
-            params = {
+            params.where = {
                 [Op.and]: []
             }
 
@@ -41,13 +47,11 @@ const index = async (req, res, next) => {
             if(category) params[Op.and].push({'$category.name$': category})
         }
 
-        const articles = await Article.findAll({
-            include: {
-                model: ArticleCategory,
-                as: 'category'
-            },
-            where: params
-        });
+        if (limit) {
+            params.limit = limit;
+        }
+
+        const articles = await Article.findAll(params);
 
         if (articles.length == 0) {
             throw new ApiErrorHandler(400, "article not found");
