@@ -3,6 +3,7 @@ const errorHandlingApi = require('../../middleware/errorHandlingApi');
 const jwtMiddleware = require('../../middleware/jwtPassport');
 
 api.use('/example', jwtMiddleware, require('./example/example.route'));
+api.use('/program-types', require('./program-type/program-type.route'));
 api.use('/users', require('./users/users.route'));
 
 api.use(errorHandlingApi);
