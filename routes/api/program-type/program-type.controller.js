@@ -23,7 +23,7 @@ const create = async (req, res, next) => {
 const index = async (req, res, next) => {
     try {
         const programType = await ProgramType.findAll();
-        if (!ProgramType) {
+        if (!programType) {
             throw new ApiErrorHandler("program type data not found")
         }
 
