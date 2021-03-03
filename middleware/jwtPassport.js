@@ -12,10 +12,18 @@ passport.use(
         return User.findByPk(res.id)
         .then(user => {
             return done(null, user);
-        }).catch(err => {
-            throw new ApiErrorHandler(401, "unauthorized");
-        })
+        });
     })
 )
 
-module.exports = passport.authenticate('jwt', { session: false });
+const jwt = (req, res, next) => {
+    passport.authenticate('jwt', { session: false }, function(err, user, info) { 
+        if (err) { throw new ApiErrorHandler(401, "unauthorized"); } 
+        if (!user) { throw new ApiErrorHandler(401, "unauthorized"); }
+        
+        req.user = user;
+        next();
+    })(req, res, next);
+}
+
+module.exports = jwt;

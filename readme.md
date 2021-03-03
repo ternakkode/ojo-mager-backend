@@ -49,9 +49,10 @@ $ npm run dev
 8. Setelah itu selalu pantau issue board, jika `card` yang kamu buat pindah dari `need review` ke `done` maka pekerjaan kamu telah dianggap selesai, namun jika terpindah di `current sprint` dengan tambahan label `need revision` maka cek ulang `merge request` yang kamu buat atau hubungi maintainer untuk memastikan perbaikan seperti apa yang harus dilakukan.
 
 
-## [WIP] Enviroment & Libaries
+## [WIP] Dependency Libraries
 - @sendgrid/mail
 - bcrypt
+- crypto-js
 - dotenv
 - express-validator
 - jsonwebtoken
@@ -115,9 +116,9 @@ Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API 
 - `/articles/`
 - dll
 
-**Pada url kedua baru gunakan kata kerja & kebab-case, contoh :**
-- `/auth/register`
-- `/auth/login`
+**Pada url kedua dan seterusnya baru gunakan kata kerja & kebab-case, contoh :**
+- `/users/register`
+- `/users/login`
 - `/users/forgot-password`
 - `/users/verification`
 
@@ -198,7 +199,7 @@ Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API 
 
 ## [WIP] Coding Style
 
-- **Route & Controller Flow**
+- ### **Route & Controller Flow**
   ```javascript
   // lokasi file : routes/api/index.js
   const api = require('express').Router();
@@ -234,8 +235,7 @@ Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API 
   module.exports = namaFiturRoute;  
   ```
 
-
-- **Controller Method** (Contohnya bisa dilihat pada folder routes/api/example.example.controller.js)
+- ### **Controller Method** (Contohnya bisa dilihat pada folder routes/api/example.example.controller.js)
   
   ```javascript
   /*
@@ -275,35 +275,75 @@ Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API 
   }
   ```
 
-  - **Validation Middleware**
+- ### **Validation Middleware**
   
-    1. Buat file baru pada folder `helpers/validation/rules` sesuai fitur yang kamu buat. contoh : `users`
-    2. tambahankan kode `const { check } = require('express-validator');` pada bagian paling atas kode kamu.
-    3. Buat array baru untuk validation rules tiap endpoint yang kamu buat.
-    4. import validation rule helpers dan file `middleware/requestValidation` lalu tambahkan 2 middleware tersebut pada endpoint yang kamu buat.
-    5. Contoh penerapannya bisa kamu cek pada file `helpers/validation/rules/users.js` untuk contoh validation rulesnya dan `routes/api/users/users.route.js` untuk contoh penggunaannya sebagai middleware.
-    6. Jika kamu bingung validation rules apa saja yang bisa dimasukan berikut beberapa contoh umumnya : 
-        - Cek apakah data dikirimkan menggunakan method `notEmpty()`
-        - Cek apakah data dikirimkan dengan format string menggunakan method `isString()`
-        - Memastikan data dikirimkan adalah foreign key salah satu model : 
-          ```javascript
-            check('params').custom(params => {
-              return Model.findOne({
-                where: { email }
-              }).then(user => {
-                if (user) {
-                  return Promise.reject('e-mail already in use');
-                }
-              });
-            })
-          ```
+  1. Buat file baru pada folder `helpers/validation/rules` sesuai fitur yang kamu buat. contoh : `users`
+  2. tambahankan kode `const { check } = require('express-validator');` pada bagian paling atas kode kamu.
+  3. Buat array baru untuk validation rules tiap endpoint yang kamu buat.
+  4. import validation rule helpers dan file `middleware/requestValidation` lalu tambahkan 2middleware tersebut pada endpoint yang kamu buat.
+  5. Selalu buat custom error message dengan menambahkan method `withMessage('pesan error')`setelah validation rule, contoh :
+    dalam kasus ini, ketika nama tidak diisi api akan otomatis mengirimkan response ke user dengansalah satu data errornya `name should not empty`.
+  ```javascript
+    check('name')
+      .notEmpty().withMessage('should not empty')
+      .isString().withMessage('should be string')
+  ```
 
-  - **Database & Model Design**
-    - Penamaan Table : lowercase, snake_case, plural. contoh :
-      - `users`
-      - `user_code`
-      - `articles`
-    - Penamaan ORM Model : SentenceCase, singular. contoh :
-      - `User`
-      - `UserCode`
-      - `Article`
+  6. Contoh penerapannya bisa kamu cek pada file `helpers/validation/rules/users.js` untuk contoh validation rulesnya dan `routes/api/users/users.route.js` untuk contoh penggunaannya sebagai middleware.
+  7. Jika kamu bingung validation rules apa saja yang bisa dimasukan berikut beberapa contoh umumnya : 
+    - Cek apakah data dikirimkan menggunakan method `notEmpty()`
+    - Cek apakah data dikirimkan dengan format string menggunakan method `isString()`
+    - Memastikan data dikirimkan adalah foreign key salah satu model : 
+  
+      ```javascript
+        check('user_id')
+        .notEmpty().withMessage('should not empty')
+        .custom(value => {
+          return User.findByPk(value).then(user => {
+            if (!user) {
+              return Promise.reject('user not found');
+            }
+          });
+        }),
+      ```
+- ### Penggunaan Middleware
+  Contoh Penerapan :
+  developer `a` ingin membuat endpoint yang dimana usernya harus `login terlebih dahulu`, `sudah verifikasi email`, `memiliki role admin`, dan `data yang dikirimkan telah tervalidasi oleh validation middleware`. maka untuk penerapannya bisa sebagai berikut
+
+  ```javascript 
+  // file feature.route.js
+  featureNameRoute = require('express').Router();
+
+  featureNameController = require('./feature-name.controller');
+  /* require semua middleware yang ingin dipakai */
+  const featureNameValidationRule = require('../../../helpers/validation/rules/featureNameValidationRule');
+  const requestValidationMiddleware = require('../../../middleware/requestValidation');
+  const jwtMiddleware = require('../../../middleware/jwtPassport');
+  const isVerified = require('../../../middleware/isVerified');
+  const isAdmin = require('../../../middleware/isAdmin');
+
+  ...
+    featureNameRoute.get(
+      '/',
+      jwtMiddleware, // jwt middleware akan dipanggil terlebih dahulu ketika mengakses dan menyimpan data user pada property req.user
+      isVerified, // is verified akan dipanggil kedua
+      isAdmin, // is admin akan dipanggil ketiga,
+      featureNameValidationRule.index, // disini sistem akan mengecek inputan user apakah sudah sesuai dengan rule yang dibuat atau belum, jika ada yang tidak sesuai sistem otomatis menyimpan property errors pada request body untuk di proses pada middleware selanjutnya
+      requestValidationMiddleware, // jika menemukan property errors middleware ini akan langsung throw error ke ApiErrorHandler untuk mengirimkan http response.
+      featureNameController.index // setelah semua verifikasi berhasil proses terakhir adalah di sisi controller untuk memproses request client.
+    );
+    /* Note :
+        Jika pada salah satu middleware ada kegagalan pada proses verifikasinya maka sistem tidak akan melanjutkan proses ke middleware selanjutnya, contoh : Ketika user gagal pada verifikasi jwt menggunakan jwtMiddleware maka sistem otomatis mengirimkan http response tanpa melalui middleware selanjutnya seperti isVerified, isAdmin, dst seperti pada contoh sebelumnya.
+  ...
+  ```
+### **Database & Model Design**
+- **Penamaan Table** : lowercase, snake_case, plural. contoh :
+  - `users`
+  - `user_code`
+  - `articles`
+- **Penamaan ORM Model** : PascalCase, singular. contoh :
+  - `User`
+  - `UserCode`
+  - `Article` 
+
+- **[TODO] Sequelize Best Practice**
