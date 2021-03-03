@@ -8,7 +8,8 @@ module.exports = {
         type: Sequelize.STRING(22)
       },
       name: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(100),
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,

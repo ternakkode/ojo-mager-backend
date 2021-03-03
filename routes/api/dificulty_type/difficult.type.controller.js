@@ -12,6 +12,9 @@ const createDifficultType = async (req, res, next) => {
             id: nanoid(),
             name
         })
+        if(!name) {
+            throw new ApiErrorHandler(400, "data not found")
+        }
         res.json(
             successApi('sucessfully create', difficult)
         );
@@ -19,6 +22,9 @@ const createDifficultType = async (req, res, next) => {
         next(err);
     }
 }
+
+
+
 
 const getDifficulities = async (req, res, next) => {
     try {
@@ -31,12 +37,15 @@ const getDifficulities = async (req, res, next) => {
     }
 }
 
+
+
+
+
 const getDifficulitiesById = async (req, res, next) => {
     try {
         const difficult = await DifficultType.findOne({
             where: { id: req.params.id }
         })
-        
         res.json(
         successApi('sucessfully find Difficulties', difficult)
         );
@@ -44,6 +53,9 @@ const getDifficulitiesById = async (req, res, next) => {
         next(err);
     }
 }
+
+
+
 
 const putDifficulitiesById = async (req, res, next) => {
     try {
@@ -53,8 +65,9 @@ const putDifficulitiesById = async (req, res, next) => {
         },{
             where: { id: req.params.id }
         });
-
-        
+        if (difficult == 0) {
+            throw new ApiErrorHandler(400, "category data not found")   
+        }
         res.json(
         successApi('sucessfully update', difficult)
         );
@@ -62,19 +75,29 @@ const putDifficulitiesById = async (req, res, next) => {
         next(err);
     }
 }
+
+
+
+
 const deleteDifficulitiesById = async (req, res, next) => {
     try {
         const  difficult = await DifficultType.destroy({
             where: { id: req.params.id }
         });
-        
+        if (difficult == 0) {
+            throw new ApiErrorHandler(400, "category data not found")   
+        }
         res.json(
-        successApi('sucessfully delete', difficult)
-        );
+            successApi('sucessfully delete', difficult)
+            );
     }   catch (err) {
         next(err);
     }
-}
+        }
+
+
+
+
 
 module.exports = {
     createDifficultType,
