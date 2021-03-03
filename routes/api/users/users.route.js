@@ -44,7 +44,6 @@ usersRoute.post(
     '/verification/verify', 
     usersValidationRule.verifyVerification,
     requestValidationMiddleware,
-    jwtMiddleware, 
     usersController.verifyVerificationAccount
 );
 
