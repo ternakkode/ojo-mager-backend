@@ -100,8 +100,8 @@ const newForgotPassword = async (req, res, next) => {
         const sendgridHelper = new SendgridHelper();
         sendgridHelper.sendTextMail(
             email,
-            'Code lupa password',
-            `Ini Code lupa password kamu ya !, click untuk merubah password : ${forgotPasswordCode}`
+            'Kode untuk reset password.',
+            `Silahkan reset password anda melalui url berikut : http://localhost:3005/change-password?code=${forgotPasswordCode}`
         );
 
         res.json(
@@ -114,12 +114,11 @@ const newForgotPassword = async (req, res, next) => {
 
 const saveNewForgotPassword = async (req, res, next) => {
     try {
-        const { user_id, code, password } = req.body;
+        const { code, password } = req.body;
         const encryptedPassword = await bcryptHelper.encryptPassword(password);
 
         const userCode = await UserCode.findOne({
             where: {
-                user_id,
                 code,
                 type: "forgot-password"
             }
@@ -211,7 +210,7 @@ const newVerificationAccount = async (req, res, next) => {
         sendgridHelper.sendTextMail(
             user.email,
             'Harap Verifikasi Akun Anda',
-            `Berikut ini adalah kode untuk verifikasi akun : ${generatedVerificationCode}`
+            `Silahkan verifikasi akun anda melalui url berikut : http://localhost:3005/verification?code=${generatedVerificationCode}`
         );
 
         res.json(
@@ -224,27 +223,36 @@ const newVerificationAccount = async (req, res, next) => {
 
 const verifyVerificationAccount = async (req, res, next) => {
     try {
-        const { user } = req;
         const { code } = req.body;
         
         const verificationCode = await UserCode.findOne({
-            where: { code, user_id: user.id }
+            where: { code }
         })
-        
+
         if(!verificationCode) { 
             throw new ApiErrorHandler(400, "Verification code invalid");
         }
 
         await User.update({
             is_verified: true,
-        }, { where: { id: user.id } });
+        }, { where: { id: verificationCode.user_id } });
 
         await UserCode.update({
             is_available: false
         }, { where: { id: verificationCode.id } });
 
+        const user = await User.findOne({
+            where: {
+                id: verificationCode.user_id
+             }
+        })
+
+        const token = jwtHelper.generateJwtToken(user.id)
+
         res.json(
-            successApi("succesfully verifiy account")
+            successApi("succesfully verifiy account", {
+                user, token
+            })
         );
     } catch (err) {
         next(err);
