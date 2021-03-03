@@ -12,11 +12,11 @@ const createDifficultType = async (req, res, next) => {
             id: nanoid(),
             name
         })
-        if(!name) {
-            throw new ApiErrorHandler(400, "data not found")
+        if (difficult == 0) {
+            throw new ApiErrorHandler(400, "Data not found")   
         }
         res.json(
-            successApi('sucessfully create', difficult)
+            successApi('Sucessfully create', difficult)
         );
     } catch (err) {
         next(err);
@@ -30,7 +30,7 @@ const getDifficulities = async (req, res, next) => {
     try {
         const difficult = await DifficultType.findAll()
         res.json(
-        successApi('sucessfully find all Difficulties', difficult)
+        successApi('Sucessfully find all difficulties', difficult)
         );
     }   catch (err) {
         next(err);
@@ -47,7 +47,7 @@ const getDifficulitiesById = async (req, res, next) => {
             where: { id: req.params.id }
         })
         res.json(
-        successApi('sucessfully find Difficulties', difficult)
+        successApi('Sucessfully find difficulties', difficult)
         );
     }   catch (err) {
         next(err);
@@ -65,11 +65,8 @@ const putDifficulitiesById = async (req, res, next) => {
         },{
             where: { id: req.params.id }
         });
-        if (difficult == 0) {
-            throw new ApiErrorHandler(400, "category data not found")   
-        }
         res.json(
-        successApi('sucessfully update', difficult)
+        successApi('Sucessfully update', difficult)
         );
     }   catch (err) {
         next(err);
@@ -85,15 +82,16 @@ const deleteDifficulitiesById = async (req, res, next) => {
             where: { id: req.params.id }
         });
         if (difficult == 0) {
-            throw new ApiErrorHandler(400, "category data not found")   
+            throw new ApiErrorHandler(400, "Data not found")   
         }
         res.json(
-            successApi('sucessfully delete', difficult)
+            successApi('Sucessfully delete', difficult)
             );
     }   catch (err) {
         next(err);
     }
         }
+
 
 
 
