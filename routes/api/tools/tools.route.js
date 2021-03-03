@@ -38,7 +38,7 @@ toolsRoute.delete(
     jwtMiddleware,
     isVerified,
     isAdmin,
-    toolsController.deleteTool
+    toolsController.remove
 );
 
 module.exports = toolsRoute;

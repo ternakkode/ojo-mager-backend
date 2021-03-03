@@ -7,6 +7,9 @@ const { successApi } = require('../../../utils/response');
 const index = async (req, res, next) => {
     try {
         const tool = await Tool.findAll();
+        if(!tool) {
+            throw new ApiErrorHandler("Tool data not found")
+        }
 
         res.json(
             successApi('Sucessfully find all tool', tool)
@@ -18,9 +21,14 @@ const index = async (req, res, next) => {
 
 const detail = async (req, res, next) => {
     try {
+        const { id } = req.params;
+
         const toolById = await Tool.findOne({
-            where: { id: req.params.id }
+            where: { id }
         });
+        if(!toolById) {
+            throw new ApiErrorHandler(400, "Tool data not found")
+        }
 
         res.json(
             successApi('Sucessfully find tool by id', toolById)
@@ -49,29 +57,41 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
     try {
-        const { name } = req.body
+        const { id } = req.params;
+        const { name } = req.body;
+
         const updateToolById = await Tool.update({
             name
         }, {
-            where: { id: req.params.id }
+            where: { id }
         });
 
+        if(updateToolById == 0) {
+            throw new ApiErrorHandler(400, "Tool data not found")
+        }
+
         res.json(
-            successApi('Sucessfully update tool', { name })
+            successApi(`Sucessfully update ${updateToolById} tool data`)
         );
     } catch (err) {
         next(err);
     }
 }
 
-const deleteTool = async (req, res, next) => {
+const remove = async (req, res, next) => {
     try {
+        const { id } = req.params;
+
         const deleteToolById = await Tool.destroy({
-            where: { id: req.params.id }
+            where: { id }
         });
 
+        if (deleteToolById == 0) {
+            throw new ApiErrorHandler(400, "Tool data not found")
+        }
+
         res.json(
-            successApi('Sucessfully delete tool')
+            successApi(`Sucessfully delete ${deleteToolById} tool data`)
         );
     } catch (err) {
         next(err);
@@ -83,5 +103,5 @@ module.exports = {
     index,
     detail,
     update,
-    deleteTool
+    remove,
 };
