@@ -4,6 +4,7 @@ const jwtMiddleware = require('../../middleware/jwtPassport');
 
 api.use('/example', jwtMiddleware, require('./example/example.route'));
 api.use('/users', require('./users/users.route'));
+api.use('/program-difficulties', require('./dificulty_type/difficult.type.route'))
 
 api.use(errorHandlingApi);
 
