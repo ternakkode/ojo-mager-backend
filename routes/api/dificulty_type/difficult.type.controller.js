@@ -13,10 +13,10 @@ const createDifficultType = async (req, res, next) => {
             name
         })
         if (difficult == 0) {
-            throw new ApiErrorHandler(400, "Data not found")   
+            throw new ApiErrorHandler(400, "Difficult data not found")   
         }
         res.json(
-            successApi('Sucessfully create', difficult)
+            successApi('Sucessfully create difficulties', difficult)
         );
     } catch (err) {
         next(err);
@@ -66,7 +66,7 @@ const putDifficulitiesById = async (req, res, next) => {
             where: { id: req.params.id }
         });
         res.json(
-        successApi('Sucessfully update', difficult)
+        successApi('Sucessfully update difficulties', difficult)
         );
     }   catch (err) {
         next(err);
@@ -82,10 +82,10 @@ const deleteDifficulitiesById = async (req, res, next) => {
             where: { id: req.params.id }
         });
         if (difficult == 0) {
-            throw new ApiErrorHandler(400, "Data not found")   
+            throw new ApiErrorHandler(400, "Difficult data not found")   
         }
         res.json(
-            successApi('Sucessfully delete', difficult)
+            successApi('Sucessfully delete difficulties', difficult)
             );
     }   catch (err) {
         next(err);
