@@ -10,9 +10,19 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Program.belongsToMany(models.Tool, { as: 'ToolsInProgram', through: models.ProgramTool, foreignKey: 'program_id' });
-      Program.hasOne(models.program_types, { foreignKey: 'program_type_id'});
-      Program.hasOne(models.difficult_types, { foreignKey: 'difficulty_type_id'});
+      this.belongsToMany(models.Tool, {
+        as: 'programsForTool',
+        through: models.ProgramTool,
+        foreignKey: 'program_id'
+      });
+      this.belongsTo(models.ProgramType, {
+        as: 'type',
+        foreignKey: 'program_type_id'
+      });
+      this.belongsTo(models.DifficultType, {
+        as: 'difficult',
+        foreignKey: 'difficulty_type_id'
+      });
     }
   };
 
