@@ -1,5 +1,5 @@
 const { nanoid } = require("nanoid");
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 
 const { Article, ArticleCategory } = require('../../../database/models')
 const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
@@ -29,7 +29,7 @@ const create = async (req, res, next) => {
 
 const index = async (req, res, next) => {
     try {
-        const { title, category, limit } = req.query;
+        const { title, category, limit, isRandom } = req.query;
         
         let params = {}
         
@@ -43,12 +43,17 @@ const index = async (req, res, next) => {
                 [Op.and]: []
             }
 
-            if(title) params[Op.and].push({title: { [Op.iLike]: `%${title}%`}});
-            if(category) params[Op.and].push({'$category.name$': category})
+            if(title) params.where[Op.and].push({title: { [Op.iLike]: `%${title}%`}});
+            if(category) params.where[Op.and].push({'$category.name$': category})
         }
 
         if (limit) {
+            console.log(limit)
             params.limit = limit;
+        }
+
+        if (isRandom) {
+            params.order = Sequelize.literal('random()')
         }
 
         const articles = await Article.findAll(params);
