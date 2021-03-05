@@ -56,7 +56,6 @@ const index = async (req, res, next) => {
         }
 
         if (limit) {
-            console.log(limit)
             params.limit = limit;
         }
 
