@@ -1,6 +1,6 @@
 const { nanoid } = require('nanoid');
 
-const { Program, ProgramType } = require('../../../database/models');
+const { Program, ProgramType, ProgramTool, Tool } = require('../../../database/models');
 const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
 const generateSlug = require('../../../utils/slug');
 const { successApi } = require('../../../utils/response');
@@ -8,7 +8,7 @@ const { Op } = require('sequelize');
 const { Sequelize } = require('sequelize');
 
 const create = async (req, res, next) => {
-    try{
+    try {
         const { title, image_url, video_url, duration, program_type_id, difficulty_type_id } = req.body;
 
         const program = await Program.create({
@@ -30,28 +30,55 @@ const create = async (req, res, next) => {
     }
 }
 
+const addToolInProgram = async (req, res, next) => {
+    try {
+        const { program_id, tool_id } = req.params;
+
+        const program = await Program.findOne({
+            where: { id: program_id }
+        })
+
+        const tool = await Tool.findOne({
+            where: { id: tool_id }
+        })
+
+        await program.addProgramsForTool(tool, { through: {} });
+
+        res.status(201).json(
+            successApi('Sucessfully add program for tool', program)
+        );
+    } catch (err) {
+        next(err);
+    }
+}
+
 const index = async (req, res, next) => {
-    try{
-        const { title, type, limit, isRandom } = req.query;
+    try {
+        const { title, type, limit, isRandom, tool } = req.query;
 
         let params = {}
 
-        params.include = {
-            model: ProgramType,
-            as: 'type'
-        }
+        params.include = [
+            {
+                model: ProgramType,
+                as: 'type'
+            },
+            {
+                model: Tool,
+                as: 'ProgramsForTool'
+            }
+        ]
 
         if (title || type) {
             params.where = {
                 [Op.and]: []
             }
 
-            if(title) params.where[Op.and].push({title: { [Op.iLike]: `%${title}%`}});
-            if(type) params.where[Op.and].push({'$type.name$': type})
+            if (title) params.where[Op.and].push({ title: { [Op.iLike]: `%${title}%` } });
+            if (type) params.where[Op.and].push({ '$type.name$': type });
         }
 
         if (limit) {
-            console.log(limit)
             params.limit = limit;
         }
 
@@ -74,7 +101,7 @@ const index = async (req, res, next) => {
 }
 
 const detail = async (req, res, next) => {
-    try{
+    try {
         const { slug } = req.params;
 
         const program = await Program.findOne({
@@ -86,7 +113,7 @@ const detail = async (req, res, next) => {
                 as: 'type'
             }
         });
-        if(!program) {
+        if (!program) {
             throw new ApiErrorHandler(400, "Program data not found")
         }
 
@@ -99,7 +126,7 @@ const detail = async (req, res, next) => {
 }
 
 const update = async (req, res, next) => {
-    try{
+    try {
         const { id } = req.params;
         const { title, image_url, video_url, duration, program_type_id, difficulty_type_id } = req.body;
 
@@ -128,14 +155,14 @@ const update = async (req, res, next) => {
 }
 
 const remove = async (req, res, next) => {
-    try{
+    try {
         const { id } = req.params;
 
         const deletedProgram = await Program.destroy({
             where: { id }
         });
 
-        if(deletedProgram == 0){
+        if (deletedProgram == 0) {
             throw new ApiErrorHandler(400, "Program data not found")
         }
 
@@ -149,6 +176,7 @@ const remove = async (req, res, next) => {
 
 module.exports = {
     create,
+    addToolInProgram,
     index,
     detail,
     update,

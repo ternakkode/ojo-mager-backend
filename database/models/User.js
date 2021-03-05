@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.UserCode, {
         foreignKey: "user_id"
       })
+      User.hasMany(models.Article, {
+        as: "articles",
+        foreignKey: "user_id"
+      })
     }
   };
   User.init({
@@ -21,7 +25,8 @@ module.exports = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     password: DataTypes.STRING,
     role: DataTypes.ENUM('admin', 'user'),
-    is_verified: DataTypes.BOOLEAN
+    is_verified: DataTypes.BOOLEAN,
+    is_subscribe_newsletter: DataTypes.BOOLEAN
   }, {
     sequelize,
     tableName: 'users',

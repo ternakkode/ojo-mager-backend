@@ -1,4 +1,6 @@
 'use strict';
+const ApiErrorHandler = require('../../helpers/ApiErrorHandler')
+
 const {
   Model
 } = require('sequelize');
@@ -11,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       this.belongsToMany(models.Tool, {
-        as: 'programsForTool',
+        as: 'ProgramsForTool',
         through: models.ProgramTool,
         foreignKey: 'program_id'
       });
@@ -33,7 +35,33 @@ module.exports = (sequelize, DataTypes) => {
     video_url: DataTypes.STRING,
     duration: DataTypes.INTEGER,
     program_type_id: DataTypes.STRING,
-    difficulty_type_id: DataTypes.STRING
+    difficulty_type_id: DataTypes.STRING,
+    parsed_duration: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const seconds = this.duration;
+        
+        let minutes = Math.floor(seconds/60);
+        let second = seconds%60;
+        let result = "";
+
+        if (minutes) {
+          result += `${minutes} menit`;
+          if (second) {
+            result += ` `;
+          }
+        }
+
+        if (second) {
+          result += `${second} detik`;
+        }
+
+        return result;
+      },
+      set(value) {
+        throw new ApiErrorHandler(400, 'Do not try to set the `parsed_duration` value!')
+      }
+    }
   }, {
     sequelize,
     tableName: 'programs',

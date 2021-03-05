@@ -25,7 +25,11 @@ module.exports = {
       },
       duration: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        get() {
+          const rawValue = this.getDataValue(duration);
+          return rawValue ? rawValue.toUpperCase() : null;
+        }
       },
       program_type_id: {
         type: Sequelize.STRING(22),

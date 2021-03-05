@@ -23,12 +23,16 @@ programsRoute.post(
     requestValidationMiddleware,
     programsController.create
 );
+programsRoute.post(
+    '/:program_id/tools/:tool_id',
+    programsController.addToolInProgram
+)
 programsRoute.put(
-    '/:slug',
+    '/:id',
     programsController.update
 );
 programsRoute.delete(
-    '/:slug',
+    '/:id',
     programsController.remove
 )
 

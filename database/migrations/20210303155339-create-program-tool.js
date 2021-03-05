@@ -2,11 +2,6 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('program_tools', {
-      id: {
-        allowNull: false,
-        primaryKey: true,
-        type: Sequelize.STRING(22)
-      },
       program_id: {
         type: Sequelize.STRING(22),
         primaryKey: false,
