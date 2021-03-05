@@ -1,18 +1,20 @@
 const { nanoid } = require("nanoid");
 const { Op, Sequelize } = require("sequelize");
 
-const { Article, ArticleCategory } = require('../../../database/models')
+const { Article, ArticleCategory, User } = require('../../../database/models')
 const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
 const generateSlug = require('../../../utils/slug')
 const { successApi } = require('../../../utils/response')
 
 const create = async (req, res, next) => {
     try {
+        const { user } = req;
         const { title, category_id, image_url, content } = req.body;
 
         const article = await Article.create({
             id: nanoid(),
             slug: generateSlug(title),
+            user_id: user.id,
             title,
             category_id,
             image_url,
@@ -33,10 +35,16 @@ const index = async (req, res, next) => {
         
         let params = {}
         
-        params.include = {
-            model: ArticleCategory,
-            as: 'category'
-        }
+        params.include = [
+            {
+                model: ArticleCategory,
+                as: 'category' 
+            },
+            {
+                model: User,
+                as: 'publisher'
+            }          
+        ]
 
         if (title || category) {
             params.where = {

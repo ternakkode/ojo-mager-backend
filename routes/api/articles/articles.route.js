@@ -16,6 +16,7 @@ articlesRoute.post(
 );
 articlesRoute.get(
     '/',
+    articlesValidationRule.index,
     articlesController.index
 );
 articlesRoute.get(
@@ -23,7 +24,7 @@ articlesRoute.get(
     articlesController.detail
 );
 articlesRoute.put(
-    '/:slug',
+    '/:id',
     jwtPassport,
     isAdmin,
     articlesValidationRule.update,
@@ -31,7 +32,7 @@ articlesRoute.put(
     articlesController.update
 );
 articlesRoute.delete(
-    '/:slug',
+    '/:id',
     jwtPassport,
     isAdmin,
     articlesController.remove
