@@ -25,29 +25,15 @@ module.exports = {
       },
       duration: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        get() {
-          const rawValue = this.getDataValue(duration);
-          return rawValue ? rawValue.toUpperCase() : null;
-        }
+        allowNull: false
       },
       program_type_id: {
         type: Sequelize.STRING(22),
         allowNull: false,
-        // primaryKey: false,
-        // references: {
-        //   model: 'program_types',
-        //   key: 'id'
-        // }
       },
       difficulty_type_id: {
         type: Sequelize.STRING(22),
         allowNull: false,
-        // primaryKey: false,
-        // references: {
-        //   model: 'difficult_types',
-        //   key: 'id'
-        // }
       },
       createdAt: {
         allowNull: false,

@@ -13,26 +13,40 @@ programsRoute.get(
 );
 programsRoute.get(
     '/:slug',
+    jwtPassport,
+    isVerified,
     programsController.detail
 );
 programsRoute.post(
     '/',
     jwtPassport,
     isAdmin,
+    isVerified,
     programsValidationRule.create,
     requestValidationMiddleware,
     programsController.create
 );
 programsRoute.post(
     '/:program_id/tools/:tool_id',
+    jwtPassport,
+    isAdmin,
+    isVerified,
     programsController.addToolInProgram
 )
 programsRoute.put(
     '/:id',
+    jwtPassport,
+    isAdmin,
+    isVerified,
+    programsValidationRule.update,
+    requestValidationMiddleware,
     programsController.update
 );
 programsRoute.delete(
     '/:id',
+    jwtPassport,
+    isAdmin,
+    isVerified,
     programsController.remove
 )
 
