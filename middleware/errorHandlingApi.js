@@ -16,7 +16,8 @@ const errorHandlingApi = async (err, req, res, next) => {
         );
     }
 
-    next();
+    console.log(err);
+    res.status(500).json(err);
 }
 
 module.exports = errorHandlingApi;
