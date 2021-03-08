@@ -13,8 +13,7 @@ module.exports = (sequelize, DataTypes) => {
         as: "articles",
         foreignKey: "user_id"
       })
-      User.belongsToMany(models.Tool, {
-        as: 'favorites_programs',
+      User.belongsToMany(models.Program, {
         through: models.FavoriteProgram,
         foreignKey: 'user_id'
       });

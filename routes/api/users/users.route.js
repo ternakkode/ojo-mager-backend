@@ -66,17 +66,17 @@ usersRoute.post(
     isVerified,
     usersController.addFavoritesPrograms
 );
-usersRoute.get(
-    '/favorites-programs',
-    jwtMiddleware,
-    isVerified,
-    usersController.getFavoritesPrograms
-);
 usersRoute.delete(
     '/favorites-programs/:program_id',
     jwtMiddleware,
     isVerified,
     usersController.deleteFavoritesPrograms
+);
+usersRoute.get(
+    '/favorites-programs',
+    jwtMiddleware,
+    isVerified,
+    usersController.getFavoritesPrograms
 );
 
 module.exports = usersRoute;

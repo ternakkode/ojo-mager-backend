@@ -5,8 +5,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class FavoriteProgram extends Model {
     static associate(models) {
-      this.belongsTo(models.User, { foreignKey: 'user_id', targetKey: 'id', as: 'user'});
-      this.belongsTo(models.Program, { foreignKey: 'program_id', targetKey: 'id', as: 'program'});
+      this.belongsTo(models.User, { foreignKey: 'user_id', targetKey: 'id'});
+      this.belongsTo(models.Program, { foreignKey: 'program_id', targetKey: 'id'});
     }
   };
   FavoriteProgram.init({
