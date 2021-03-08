@@ -9,12 +9,13 @@ const { Sequelize } = require('sequelize');
 
 const create = async (req, res, next) => {
     try {
-        const { title, image_url, video_url, duration, program_type_id, difficulty_type_id } = req.body;
+        const { title, description, image_url, video_url, duration, program_type_id, difficulty_type_id } = req.body;
 
         const program = await Program.create({
             id: nanoid(),
             slug: generateSlug(title),
             title,
+            description,
             image_url,
             video_url,
             duration,
@@ -128,11 +129,12 @@ const detail = async (req, res, next) => {
 const update = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { title, image_url, video_url, duration, program_type_id, difficulty_type_id } = req.body;
+        const { title, description, image_url, video_url, duration, program_type_id, difficulty_type_id } = req.body;
 
         const program = await Program.update({
             slug: generateSlug(title),
             title,
+            description,
             image_url,
             video_url,
             duration,

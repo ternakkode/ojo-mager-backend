@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
   Program.init({
     slug: DataTypes.STRING,
     title: DataTypes.STRING,
+    description: DataTypes.STRING,
     image_url: DataTypes.STRING,
     video_url: DataTypes.STRING,
     duration: DataTypes.INTEGER,
