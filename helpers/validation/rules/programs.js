@@ -17,6 +17,9 @@ const create = [
                 }
             })
         }),
+    check('description')
+        .notEmpty().withMessage('should not empty')
+        .isString().withMessage('should be string'),
     check('image_url')
         .notEmpty().withMessage('should not empty')
         .isString().withMessage('should be string'),
@@ -54,6 +57,9 @@ const update = [
                 }
             })
         }),
+    check('description')
+        .notEmpty().withMessage('should not empty')
+        .isString().withMessage('should be string'),
     check('image_url')
         .notEmpty().withMessage('should not empty')
         .isString().withMessage('should be string'),
