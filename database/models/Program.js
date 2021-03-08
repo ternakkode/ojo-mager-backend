@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'difficult',
         foreignKey: 'difficulty_type_id'
       });
+      this.belongsToMany(models.Tool, {
+        as: 'favorited_users',
+        through: models.FavoriteProgram,
+        foreignKey: 'program_id'
+      });
     }
   };
 

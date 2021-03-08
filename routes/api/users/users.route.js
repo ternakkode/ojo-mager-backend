@@ -60,5 +60,23 @@ usersRoute.post(
     requestValidationMiddleware,
     usersController.verifyVerificationAccount
 );
+usersRoute.post(
+    '/favorites-programs/:program_id',
+    jwtMiddleware,
+    isVerified,
+    usersController.addFavoritesPrograms
+);
+usersRoute.get(
+    '/favorites-programs',
+    jwtMiddleware,
+    isVerified,
+    usersController.getFavoritesPrograms
+);
+usersRoute.delete(
+    '/favorites-programs/:program_id',
+    jwtMiddleware,
+    isVerified,
+    usersController.deleteFavoritesPrograms
+);
 
 module.exports = usersRoute;

@@ -1,7 +1,7 @@
 const { nanoid } = require('nanoid');
 
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
-const { User, UserCode } = require('../../../database/models')
+const { FavoriteProgram, User, UserCode, } = require('../../../database/models')
 const bcryptHelper = require('../../../helpers/bcrypt');
 const cryptoHelper = require('../../../helpers/crypto')
 const jwtHelper = require('../../../helpers/jwt');
@@ -258,6 +258,85 @@ const verifyVerificationAccount = async (req, res, next) => {
     }
 }
 
+const addFavoritesPrograms = async (req, res, next) => {
+    try {
+        const { user } = req;
+
+        await FavoriteProgram.create({
+            user_id : user.id,
+            program_id
+        });
+
+        res.status(201).json(
+            successApi("successfully add favorites program")
+        );
+    } catch (err) {
+        next(err);
+    }
+}
+
+const getFavoritesPrograms = async (req, res, next) => {
+    try {
+        const { user } = req;
+
+        let params = {}
+
+        params.include = {
+            model: Program,
+            as: 'program',
+            include: {
+                model: Tool,
+                as: 'ProgramsForTool'
+            }
+        }
+
+        if (title || type) {
+            params.where = {
+                [Op.and]: [
+                    { user_id: user.id }
+                ]
+            }
+
+            if (title) params.where[Op.and].push({ '$program.title$': { [Op.iLike]: `%${title}%` } });
+            if (type) params.where[Op.and].push({ '$program.type.name$': type });
+        }
+
+        const favoritedPrograms = await FavoriteProgram(params);
+        if (!favoritedPrograms) {
+            throw new ApiErrorHandler(400, "program not found");
+        }
+
+        res.json(
+            successApi('successfully fetch favorited article', favoritedPrograms)
+        );
+    } catch (err) {
+        next(err);
+    }
+}
+
+const deleteFavoritesPrograms = async (req, res, next) => {
+    try {
+        const { user } = req;
+
+        const deletedFavorite = await FavoriteProgram.destory({
+            where : {
+                user_id : user.id,
+                program_id
+            }
+        });
+
+        if (deletedFavorite == 0) {
+            throw new ApiErrorHandler(400, "Favorite program data not found")
+        }
+
+        res.status(201).json(
+            successApi("successfully delete favorites program")
+        );
+    } catch (err) {
+        next(err);
+    }
+}
+
 module.exports = {
     profileInfo,
     editProfile,
@@ -267,5 +346,8 @@ module.exports = {
     saveNewForgotPassword,
     validateForgotPassword,
     newVerificationAccount,
-    verifyVerificationAccount
+    verifyVerificationAccount,
+    addFavoritesPrograms,
+    getFavoritesPrograms,
+    deleteFavoritesPrograms
 }
