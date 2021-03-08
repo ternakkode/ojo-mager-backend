@@ -4,7 +4,22 @@ const usersController = require('./users.controller');
 const usersValidationRule = require('../../../helpers/validation/rules/users');
 const requestValidationMiddleware = require('../../../middleware/requestValidation');
 const jwtMiddleware = require('../../../middleware/jwtPassport');
+const isVerified = require('../../../middleware/isVerified');
 
+usersRoute.get(
+    '/',
+    jwtMiddleware,
+    isVerified,
+    usersController.profileInfo,
+);
+usersRoute.post(
+    '/',
+    jwtMiddleware,
+    isVerified,
+    usersValidationRule.editProfile,
+    requestValidationMiddleware,
+    usersController.editProfile
+);
 usersRoute.post(
     '/register', 
     usersValidationRule.register,
@@ -37,7 +52,6 @@ usersRoute.post(
 );
 usersRoute.post(
     '/verification/new', 
-    jwtMiddleware, 
     usersController.newVerificationAccount
 );
 usersRoute.post(
