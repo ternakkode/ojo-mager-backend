@@ -1,15 +1,17 @@
 const programTypeRoute = require('express').Router();
 
-const isAdmin = require('../../../middleware/isAdmin');
 const programTypeController = require('./program-type.controller');
 const programtypeValidationRule = require('../../../helpers/validation/rules/program-types')
-const jwtPassport = require('../../../middleware/jwtPassport');
 const requestValidationMiddleware = require('../../../middleware/requestValidation');
+const isVerified = require('../../../middleware/isVerified');
+const jwtPassport = require('../../../middleware/jwtPassport');
+const verifyRoles = require('../../../middleware/verifiyRoles');
 
 programTypeRoute.post(
     '/',
     jwtPassport,
-    isAdmin,
+    isVerified,
+    verifyRoles(['admin']),
     programtypeValidationRule.create,
     requestValidationMiddleware,
     programTypeController.create
@@ -25,7 +27,8 @@ programTypeRoute.get(
 programTypeRoute.put(
     '/:id',
     jwtPassport,
-    isAdmin,
+    isVerified,
+    verifyRoles(['admin']),
     programtypeValidationRule.update,
     requestValidationMiddleware,
     programTypeController.update
@@ -33,7 +36,8 @@ programTypeRoute.put(
 programTypeRoute.delete(
     '/:id',
     jwtPassport,
-    isAdmin,
+    isVerified,
+    verifyRoles(['admin']),
     programTypeController.remove
 );
 

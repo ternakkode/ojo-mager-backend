@@ -3,14 +3,14 @@ const difficultyTypesRoute = require('express').Router();
 const difficultyTypesController = require('./difficult.type.controller');
 const difficultTypeValidationRule = require('../../../helpers/validation/rules/difficultes')
 const requestValidationMiddleware = require('../../../middleware/requestValidation')
-const isAdmin = require('../../../middleware/isAdmin');
 const isVerified = require('../../../middleware/isVerified')
 const jwtMiddleware = require('../../../middleware/jwtPassport');
+const verifyRoles = require('../../../middleware/verifiyRoles');
 
 difficultyTypesRoute.post('/',
     jwtMiddleware,
     isVerified,
-    isAdmin,
+    verifyRoles(['admin']),
     difficultTypeValidationRule.create,
     requestValidationMiddleware,
     difficultyTypesController.createDifficultType,
@@ -27,7 +27,7 @@ difficultyTypesRoute.get('/:id',
 difficultyTypesRoute.put('/:id',
     jwtMiddleware,
     isVerified,
-    isAdmin,
+    verifyRoles(['admin']),
     difficultTypeValidationRule.update,
     requestValidationMiddleware,
     difficultyTypesController.putDifficulitiesById
@@ -36,7 +36,7 @@ difficultyTypesRoute.put('/:id',
 difficultyTypesRoute.delete('/:id',
     jwtMiddleware,
     isVerified,
-    isAdmin,
+    verifyRoles(['admin']),
     difficultyTypesController.deleteDifficulitiesById,
 );
 

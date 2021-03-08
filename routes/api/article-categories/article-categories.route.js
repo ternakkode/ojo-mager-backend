@@ -2,14 +2,16 @@ const articleCategoriesRoute = require('express').Router();
 
 const articleCategoriesController = require('./article-categories.controller');
 const articleCategoriesValidationRule = require('../../../helpers/validation/rules/article-categories')
-const isAdmin = require('../../../middleware/jwtPassport');
+const isVerified = require('../../../middleware/isVerified');
 const jwtPassport = require('../../../middleware/jwtPassport');
 const requestValidationMiddleware = require('../../../middleware/requestValidation');
+const verifyRoles = require('../../../middleware/verifiyRoles');
 
 articleCategoriesRoute.post(
     '/',
     jwtPassport,
-    isAdmin,
+    isVerified,
+    verifyRoles(['admin']),
     articleCategoriesValidationRule.create,
     requestValidationMiddleware,
     articleCategoriesController.create
@@ -25,7 +27,8 @@ articleCategoriesRoute.get(
 articleCategoriesRoute.put(
     '/:id', 
     jwtPassport,
-    isAdmin,
+    isVerified,
+    verifyRoles(['admin']),
     articleCategoriesValidationRule.update,
     requestValidationMiddleware,
     articleCategoriesController.update
@@ -33,7 +36,8 @@ articleCategoriesRoute.put(
 articleCategoriesRoute.delete(
     '/:id', 
     jwtPassport,
-    isAdmin,
+    isVerified,
+    verifyRoles(['admin']),
     articleCategoriesController.remove
 );
 

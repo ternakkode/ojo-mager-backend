@@ -3,9 +3,9 @@ const programsRoute = require('express').Router();
 const programsController = require('./program.controller');
 const programsValidationRule = require('../../../helpers/validation/rules/programs');
 const requestValidationMiddleware = require('../../../middleware/requestValidation');
-const isAdmin = require('../../../middleware/isAdmin');
 const isVerified = require('../../../middleware/isVerified');
 const jwtPassport = require('../../../middleware/jwtPassport');
+const verifyRoles = require('../../../middleware/verifiyRoles');
 
 programsRoute.get(
     '/',
@@ -20,8 +20,8 @@ programsRoute.get(
 programsRoute.post(
     '/',
     jwtPassport,
-    isAdmin,
     isVerified,
+    verifyRoles(['admin']),
     programsValidationRule.create,
     requestValidationMiddleware,
     programsController.create
@@ -29,15 +29,15 @@ programsRoute.post(
 programsRoute.post(
     '/:program_id/tools/:tool_id',
     jwtPassport,
-    isAdmin,
     isVerified,
+    verifyRoles(['admin']),
     programsController.addToolInProgram
 )
 programsRoute.put(
     '/:id',
     jwtPassport,
-    isAdmin,
     isVerified,
+    verifyRoles(['admin']),
     programsValidationRule.update,
     requestValidationMiddleware,
     programsController.update
@@ -45,8 +45,8 @@ programsRoute.put(
 programsRoute.delete(
     '/:id',
     jwtPassport,
-    isAdmin,
     isVerified,
+    verifyRoles(['admin']),
     programsController.remove
 )
 

@@ -3,9 +3,9 @@ const toolsRoute = require('express').Router();
 const toolsController = require('./tools.controller');
 const toolsValidationRule = require('../../../helpers/validation/rules/tools')
 const requestValidationMiddleware = require('../../../middleware/requestValidation')
-const isAdmin = require('../../../middleware/isAdmin');
 const isVerified = require('../../../middleware/isVerified')
 const jwtMiddleware = require('../../../middleware/jwtPassport');
+const verifyRoles = require('../../../middleware/verifiyRoles');
 
 toolsRoute.get(
     '/',
@@ -19,7 +19,7 @@ toolsRoute.post(
     '/',
     jwtMiddleware,
     isVerified,
-    isAdmin,
+    verifyRoles(['admin']),
     toolsValidationRule.create,
     requestValidationMiddleware,
     toolsController.create
@@ -28,7 +28,7 @@ toolsRoute.put(
     '/:id',
     jwtMiddleware,
     isVerified,
-    isAdmin,
+    verifyRoles(['admin']),
     toolsValidationRule.update,
     requestValidationMiddleware,
     toolsController.update
@@ -37,7 +37,7 @@ toolsRoute.delete(
     '/:id',
     jwtMiddleware,
     isVerified,
-    isAdmin,
+    verifyRoles(['admin']),
     toolsController.remove
 );
 

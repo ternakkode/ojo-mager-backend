@@ -320,20 +320,20 @@ Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API 
   const requestValidationMiddleware = require('../../../middleware/requestValidation');
   const jwtMiddleware = require('../../../middleware/jwtPassport');
   const isVerified = require('../../../middleware/isVerified');
-  const isAdmin = require('../../../middleware/isAdmin');
+  const verifyRoles = require('../../../middleware/verifyRoles');
 
   ...
     featureNameRoute.get(
       '/',
       jwtMiddleware, // jwt middleware akan dipanggil terlebih dahulu ketika mengakses dan menyimpan data user pada property req.user
       isVerified, // is verified akan dipanggil kedua
-      isAdmin, // is admin akan dipanggil ketiga,
+      verifyRoles(['admin']), // verifyRoles akan dipanggil ketiga,
       featureNameValidationRule.index, // disini sistem akan mengecek inputan user apakah sudah sesuai dengan rule yang dibuat atau belum, jika ada yang tidak sesuai sistem otomatis menyimpan property errors pada request body untuk di proses pada middleware selanjutnya
       requestValidationMiddleware, // jika menemukan property errors middleware ini akan langsung throw error ke ApiErrorHandler untuk mengirimkan http response.
       featureNameController.index // setelah semua verifikasi berhasil proses terakhir adalah di sisi controller untuk memproses request client.
     );
     /* Note :
-        Jika pada salah satu middleware ada kegagalan pada proses verifikasinya maka sistem tidak akan melanjutkan proses ke middleware selanjutnya, contoh : Ketika user gagal pada verifikasi jwt menggunakan jwtMiddleware maka sistem otomatis mengirimkan http response tanpa melalui middleware selanjutnya seperti isVerified, isAdmin, dst seperti pada contoh sebelumnya.
+        Jika pada salah satu middleware ada kegagalan pada proses verifikasinya maka sistem tidak akan melanjutkan proses ke middleware selanjutnya, contoh : Ketika user gagal pada verifikasi jwt menggunakan jwtMiddleware maka sistem otomatis mengirimkan http response tanpa melalui middleware selanjutnya seperti isVerified, verifyRoles, dst seperti pada contoh sebelumnya.
   ...
   ```
 ### **Database & Model Design**
