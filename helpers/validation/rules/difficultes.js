@@ -2,7 +2,6 @@ const { check } = require('express-validator');
 
 const { DifficultType } = require('../../../database/models');
 
-
 const create = [
     check('name')
         .notEmpty().withMessage('should not empty')
