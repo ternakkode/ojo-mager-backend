@@ -15,16 +15,13 @@ const createDifficultType = async (req, res, next) => {
         if (difficult == 0) {
             throw new ApiErrorHandler(400, "Difficult data not found")   
         }
-        res.json(
+        res.status(201).json(
             successApi('Sucessfully create difficulties', difficult)
         );
     } catch (err) {
         next(err);
     }
 }
-
-
-
 
 const getDifficulities = async (req, res, next) => {
     try {
@@ -36,10 +33,6 @@ const getDifficulities = async (req, res, next) => {
         next(err);
     }
 }
-
-
-
-
 
 const getDifficulitiesById = async (req, res, next) => {
     try {
@@ -53,9 +46,6 @@ const getDifficulitiesById = async (req, res, next) => {
         next(err);
     }
 }
-
-
-
 
 const putDifficulitiesById = async (req, res, next) => {
     try {
@@ -73,9 +63,6 @@ const putDifficulitiesById = async (req, res, next) => {
     }
 }
 
-
-
-
 const deleteDifficulitiesById = async (req, res, next) => {
     try {
         const  difficult = await DifficultType.destroy({
@@ -91,11 +78,6 @@ const deleteDifficulitiesById = async (req, res, next) => {
         next(err);
     }
         }
-
-
-
-
-
 
 module.exports = {
     createDifficultType,

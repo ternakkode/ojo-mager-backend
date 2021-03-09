@@ -7,11 +7,11 @@ const { successApi } = require('../../../utils/response');
 const index = async (req, res, next) => {
     try {
         const tool = await Tool.findAll();
-        if(!tool) {
-            throw new ApiErrorHandler("Tool data not found")
+        if(tool == 0) {
+            throw new ApiErrorHandler(400, "Tool data not found")
         }
 
-        res.json(
+        res.status(201).json(
             successApi('Sucessfully find all tool', tool)
         );
     } catch (err) {

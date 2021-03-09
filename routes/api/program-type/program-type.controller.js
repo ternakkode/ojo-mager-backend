@@ -12,7 +12,7 @@ const create = async (req, res, next) => {
             name
         });
 
-        res.status(200).json(
+        res.status(201).json(
             successApi("successfulyl create Program Type", programType)
         )
     } catch (err) {

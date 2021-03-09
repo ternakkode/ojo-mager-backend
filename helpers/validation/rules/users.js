@@ -2,6 +2,16 @@ const { check } = require('express-validator');
 
 const { User } = require('../../../database/models');
 
+const editProfile = [
+    check('name')
+        .notEmpty().withMessage('should not empty')
+        .isString().withMessage('should be string'),
+    check('password')
+        .notEmpty().withMessage('should not empty')
+        .isString().withMessage('should be string'),
+    check('is_subscribe_nwesletter').toBoolean()
+];
+
 const register = [
     check('name')
         .notEmpty().withMessage('should not empty')
@@ -49,21 +59,17 @@ const validateForgotPassword = [
 ]
 
 const saveForgotPassword = [
-    check('user_id')
-        .notEmpty().withMessage('should not empty')
-        .custom(value => {
-            return User.findByPk(value).then(user => {
-                if (!user) {
-                    return Promise.reject('user not found');
-                }
-            });
-        }),
     check('code')
         .notEmpty().withMessage('should not empty')
         .isString().withMessage('should be string'),
     check('password')
         .notEmpty().withMessage('should not empty')
         .isString().withMessage('should be string')
+]
+const newVerificationAccount = [
+    check('user_id')
+    .notEmpty().withMessage('should not empty')
+    .isString().withMessage('should be string')
 ]
 
 const verifyVerification = [
@@ -73,10 +79,12 @@ const verifyVerification = [
 ]
 
 module.exports = {
+    editProfile,
     register,
     login,
     newForgotPassword,
     validateForgotPassword,
     saveForgotPassword,
+    newVerificationAccount,
     verifyVerification
 };

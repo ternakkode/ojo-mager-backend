@@ -1,20 +1,14 @@
 const { check } = require('express-validator');
 
-const { DifficultType } = require('../../../database/models');
-
-const create = [
-    check('name')
+const broadcast = [
+    check('title')
+        .notEmpty().withMessage('should not empty')
+        .isString().withMessage('should be string'),
+    check('message')
         .notEmpty().withMessage('should not empty')
         .isString().withMessage('should be string')
-]
-
-const update = [
-    check('name')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
-]
+];
 
 module.exports = {
-    create,
-    update
+    broadcast
 }

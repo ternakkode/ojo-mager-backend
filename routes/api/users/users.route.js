@@ -4,7 +4,22 @@ const usersController = require('./users.controller');
 const usersValidationRule = require('../../../helpers/validation/rules/users');
 const requestValidationMiddleware = require('../../../middleware/requestValidation');
 const jwtMiddleware = require('../../../middleware/jwtPassport');
+const isVerified = require('../../../middleware/isVerified');
 
+usersRoute.get(
+    '/',
+    jwtMiddleware,
+    isVerified,
+    usersController.profileInfo,
+);
+usersRoute.put(
+    '/',
+    jwtMiddleware,
+    isVerified,
+    usersValidationRule.editProfile,
+    requestValidationMiddleware,
+    usersController.editProfile
+);
 usersRoute.post(
     '/register', 
     usersValidationRule.register,
@@ -37,7 +52,8 @@ usersRoute.post(
 );
 usersRoute.post(
     '/verification/new', 
-    jwtMiddleware, 
+    usersValidationRule.newVerificationAccount,
+    requestValidationMiddleware,
     usersController.newVerificationAccount
 );
 usersRoute.post(
@@ -45,6 +61,24 @@ usersRoute.post(
     usersValidationRule.verifyVerification,
     requestValidationMiddleware,
     usersController.verifyVerificationAccount
+);
+usersRoute.post(
+    '/favorites-programs/:program_id',
+    jwtMiddleware,
+    isVerified,
+    usersController.addFavoritesPrograms
+);
+usersRoute.delete(
+    '/favorites-programs/:program_id',
+    jwtMiddleware,
+    isVerified,
+    usersController.deleteFavoritesPrograms
+);
+usersRoute.get(
+    '/favorites-programs',
+    jwtMiddleware,
+    isVerified,
+    usersController.getFavoritesPrograms
 );
 
 module.exports = usersRoute;
