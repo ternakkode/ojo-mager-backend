@@ -24,6 +24,11 @@ module.exports = {
         type: Sequelize.ENUM('admin', 'user')
       },
       is_verified: {
+        allowNull: false,
+        type: Sequelize.BOOLEAN
+      },
+      is_subscribe_newsletter: {
+        allowNull: false,
         type: Sequelize.BOOLEAN
       },
       createdAt: {
