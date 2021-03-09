@@ -39,14 +39,52 @@ const addToolInProgram = async (req, res, next) => {
             where: { id: program_id }
         })
 
+        if (!program) {
+            throw new ApiErrorHandler(400, 'program data not found')
+        }
+
         const tool = await Tool.findOne({
             where: { id: tool_id }
         })
 
-        await program.addProgramsForTool(tool, { through: {} });
+        if (!tool) {
+            throw new ApiErrorHandler(400, 'tool data not found')
+        }
+
+        await program.addProgramsForTool(tool);
 
         res.status(201).json(
-            successApi('Sucessfully add program for tool', program)
+            successApi('Sucessfully add program for tool')
+        );
+    } catch (err) {
+        next(err);
+    }
+}
+
+const deleteToolInProgram = async (req, res, next) => {
+    try {
+        const { program_id, tool_id } = req.params;
+
+        const program = await Program.findOne({
+            where: { id: program_id }
+        })
+
+        if (!program) {
+            throw new ApiErrorHandler(400, 'program data not found')
+        }
+
+        const tool = await Tool.findOne({
+            where: { id: tool_id }
+        })
+
+        if (!tool) {
+            throw new ApiErrorHandler(400, 'tool data not found')
+        }
+
+        await program.removeProgramsForTool(tool);
+
+        res.json(
+            successApi('Sucessfully delete program for tool')
         );
     } catch (err) {
         next(err);
@@ -93,7 +131,7 @@ const index = async (req, res, next) => {
             throw new ApiErrorHandler(400, "program not found");
         }
 
-        res.status(201).json(
+        res.json(
             successApi("sucessfully get program data", program)
         );
     } catch (err) {
@@ -179,6 +217,7 @@ const remove = async (req, res, next) => {
 module.exports = {
     create,
     addToolInProgram,
+    deleteToolInProgram,
     index,
     detail,
     update,

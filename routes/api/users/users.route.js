@@ -12,7 +12,7 @@ usersRoute.get(
     isVerified,
     usersController.profileInfo,
 );
-usersRoute.post(
+usersRoute.put(
     '/',
     jwtMiddleware,
     isVerified,
@@ -52,6 +52,8 @@ usersRoute.post(
 );
 usersRoute.post(
     '/verification/new', 
+    usersValidationRule.newVerificationAccount,
+    requestValidationMiddleware,
     usersController.newVerificationAccount
 );
 usersRoute.post(

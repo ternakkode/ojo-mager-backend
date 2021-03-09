@@ -51,7 +51,7 @@ const register = async (req, res, next) => {
             is_subscribe_newsletter: false
         });
 
-        res.json(
+        res.status(201).json(
             successApi('sucessfully register', user)
         );
     } catch (err) {
@@ -274,7 +274,7 @@ const addFavoritesPrograms = async (req, res, next) => {
 
         await user.addProgram(program);
         
-        res.json(
+        res.status(201).json(
             successApi('sucessfully add favorite program')
         );
     } catch (err) {

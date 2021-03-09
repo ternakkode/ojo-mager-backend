@@ -12,7 +12,7 @@ const create = async (req, res, next) => {
             name
         });
 
-        res.status(200).json(
+        res.status(201).json(
             successApi("successfulyl create article category", articleCategory)
         )
     } catch (err) {
@@ -83,7 +83,7 @@ const remove = async (req, res, next) => {
         }
     
         res.json(
-            successApi(`successfuly delete ${articleCategory} article category data`)
+            successApi(`successfuly delete ${deletedArticleCategory} article category data`)
         );
     } catch (err) {
         next(err);

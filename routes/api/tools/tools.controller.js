@@ -11,7 +11,7 @@ const index = async (req, res, next) => {
             throw new ApiErrorHandler(400, "Tool data not found")
         }
 
-        res.json(
+        res.status(201).json(
             successApi('Sucessfully find all tool', tool)
         );
     } catch (err) {

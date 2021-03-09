@@ -69,7 +69,7 @@ const index = async (req, res, next) => {
             throw new ApiErrorHandler(400, "article not found");
         }
 
-        res.status(201).json(
+        res.json(
             successApi("sucessfully get article data", articles)
         );
     } catch (err) {
