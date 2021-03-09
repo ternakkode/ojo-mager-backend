@@ -32,7 +32,14 @@ programsRoute.post(
     isVerified,
     verifyRoles(['admin']),
     programsController.addToolInProgram
-)
+);
+programsRoute.delete(
+    '/:program_id/tools/:tool_id',
+    jwtPassport,
+    isVerified,
+    verifyRoles(['admin']),
+    programsController.deleteToolInProgram
+);
 programsRoute.put(
     '/:id',
     jwtPassport,

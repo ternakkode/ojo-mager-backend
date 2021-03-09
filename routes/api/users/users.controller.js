@@ -1,7 +1,8 @@
 const { nanoid } = require('nanoid');
+const { Op, Sequelize } = require('sequelize');
 
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
-const { User, UserCode } = require('../../../database/models')
+const { Program, ProgramType, User, UserCode, } = require('../../../database/models')
 const bcryptHelper = require('../../../helpers/bcrypt');
 const cryptoHelper = require('../../../helpers/crypto')
 const jwtHelper = require('../../../helpers/jwt');
@@ -50,7 +51,7 @@ const register = async (req, res, next) => {
             is_subscribe_newsletter: false
         });
 
-        res.json(
+        res.status(201).json(
             successApi('sucessfully register', user)
         );
     } catch (err) {
@@ -258,6 +259,101 @@ const verifyVerificationAccount = async (req, res, next) => {
     }
 }
 
+const addFavoritesPrograms = async (req, res, next) => {
+    try {
+        const { user } = req;
+        const { program_id } = req.params;
+
+        const program = await Program.findOne({
+            where: { id : program_id }
+        });
+
+        if (!program) {
+            throw new ApiErrorHandler(400, 'program not found');
+        }
+
+        await user.addProgram(program);
+        
+        res.status(201).json(
+            successApi('sucessfully add favorite program')
+        );
+    } catch (err) {
+        next(err);
+    }
+}
+
+const deleteFavoritesPrograms = async (req, res, next) => {
+    try {
+        const { user } = req;
+        const { program_id }  =  req.params;
+
+        const program = await Program.findOne({
+            where: { id : program_id }
+        });
+
+        if (!program) {
+            throw new ApiErrorHandler(400, 'program not found');
+        }
+
+        await user.removeProgram(program);
+
+        res.json(
+            successApi('sucessfully delete favorite program')
+        );
+    } catch (err) {
+        next(err);
+    }
+}
+
+const getFavoritesPrograms = async (req, res, next) => {
+    try { 
+        const { user } = req;
+        const { title, type, limit, isRandom } = req.query;
+
+        let params = {
+            include: [
+                {
+                    model: ProgramType,
+                    as: 'type'
+                },
+                {
+                    model: User,
+                }
+            ],
+            where: {
+                [Op.and]: [
+                    { '$Users.id$': user.id }
+                ]
+            }
+        }
+
+        if (title || type) {
+            if (title) params.where[Op.and].push({ title: { [Op.iLike]: `%${title}%` } });
+            if (type) params.where[Op.and].push({ '$type.name$': type });
+        }
+
+        if (limit) {
+            params.limit = limit;
+        }
+
+        if (isRandom) {
+            params.order = Sequelize.literal('random()')
+        }
+
+        const program = await Program.findAll(params);
+        
+        if (!program) {
+            throw new ApiErrorHandler(400, 'program not found');
+        }
+
+        res.json(
+            successApi('sucefully get favorite program', program)
+        );
+    } catch (err) {
+        next(err);
+    }
+ } 
+
 module.exports = {
     profileInfo,
     editProfile,
@@ -267,5 +363,8 @@ module.exports = {
     saveNewForgotPassword,
     validateForgotPassword,
     newVerificationAccount,
-    verifyVerificationAccount
+    verifyVerificationAccount,
+    addFavoritesPrograms,
+    deleteFavoritesPrograms,
+    getFavoritesPrograms
 }

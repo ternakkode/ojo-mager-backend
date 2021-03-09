@@ -12,7 +12,7 @@ usersRoute.get(
     isVerified,
     usersController.profileInfo,
 );
-usersRoute.post(
+usersRoute.put(
     '/',
     jwtMiddleware,
     isVerified,
@@ -52,6 +52,8 @@ usersRoute.post(
 );
 usersRoute.post(
     '/verification/new', 
+    usersValidationRule.newVerificationAccount,
+    requestValidationMiddleware,
     usersController.newVerificationAccount
 );
 usersRoute.post(
@@ -59,6 +61,24 @@ usersRoute.post(
     usersValidationRule.verifyVerification,
     requestValidationMiddleware,
     usersController.verifyVerificationAccount
+);
+usersRoute.post(
+    '/favorites-programs/:program_id',
+    jwtMiddleware,
+    isVerified,
+    usersController.addFavoritesPrograms
+);
+usersRoute.delete(
+    '/favorites-programs/:program_id',
+    jwtMiddleware,
+    isVerified,
+    usersController.deleteFavoritesPrograms
+);
+usersRoute.get(
+    '/favorites-programs',
+    jwtMiddleware,
+    isVerified,
+    usersController.getFavoritesPrograms
 );
 
 module.exports = usersRoute;

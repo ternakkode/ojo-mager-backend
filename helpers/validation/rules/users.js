@@ -66,13 +66,17 @@ const saveForgotPassword = [
         .notEmpty().withMessage('should not empty')
         .isString().withMessage('should be string')
 ]
+const newVerificationAccount = [
+    check('user_id')
+    .notEmpty().withMessage('should not empty')
+    .isString().withMessage('should be string')
+]
 
 const verifyVerification = [
     check('code')
         .notEmpty().withMessage('should not empty')
         .isString().withMessage('should be string')
 ]
-
 
 module.exports = {
     editProfile,
@@ -81,5 +85,6 @@ module.exports = {
     newForgotPassword,
     validateForgotPassword,
     saveForgotPassword,
+    newVerificationAccount,
     verifyVerification
 };
