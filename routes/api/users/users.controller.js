@@ -1,7 +1,8 @@
 const { nanoid } = require('nanoid');
+const { Op, Sequelize } = require('sequelize');
 
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
-const { Program, User, UserCode, } = require('../../../database/models')
+const { Program, ProgramType, User, UserCode, } = require('../../../database/models')
 const bcryptHelper = require('../../../helpers/bcrypt');
 const cryptoHelper = require('../../../helpers/crypto')
 const jwtHelper = require('../../../helpers/jwt');
@@ -307,11 +308,39 @@ const deleteFavoritesPrograms = async (req, res, next) => {
 const getFavoritesPrograms = async (req, res, next) => {
     try { 
         const { user } = req;
+        const { title, type, limit, isRandom } = req.query;
 
-        const program = await Program.findAll({
-            include: User,
-            where: { '$Users.id$': user.id }
-        });
+        let params = {
+            include: [
+                {
+                    model: ProgramType,
+                    as: 'type'
+                },
+                {
+                    model: User,
+                }
+            ],
+            where: {
+                [Op.and]: [
+                    { '$Users.id$': user.id }
+                ]
+            }
+        }
+
+        if (title || type) {
+            if (title) params.where[Op.and].push({ title: { [Op.iLike]: `%${title}%` } });
+            if (type) params.where[Op.and].push({ '$type.name$': type });
+        }
+
+        if (limit) {
+            params.limit = limit;
+        }
+
+        if (isRandom) {
+            params.order = Sequelize.literal('random()')
+        }
+
+        const program = await Program.findAll(params);
         
         if (!program) {
             throw new ApiErrorHandler(400, 'program not found');
