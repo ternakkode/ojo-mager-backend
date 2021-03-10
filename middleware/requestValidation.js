@@ -7,11 +7,12 @@ module.exports = validate = (req, res, next) => {
     if (errors.isEmpty()) {
         next();
     } else {
-        const validationMessage = [];
+        const validationMessage = new Object();
 
         errors.errors.forEach(err => {
-            validationMessage.push(`${err.param} ${err.msg}`)
-        })
+            validationMessage[err.param] = err.msg;
+        });
+        
         throw new ApiErrorHandler(422, 'error validating request data', validationMessage);
     }
 }

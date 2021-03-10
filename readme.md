@@ -21,37 +21,10 @@ $ sequelize db:seed
 # jalankan api pada local server anda :
 $ npm run dev
 ```
-## [WIP] Gitlab Workflow
-1. Pindahkan issue yang sudah di-assign ke kamu dari card `current sprint` ke card `doing`
-   
-    ![Move Card To Doing](./guideline/gitflow/move-card-to-doing.gif)
-1. Masuk kedalam local repository kamu, lalu pindah ke branch `development` dan selalu `pull` dari branch tersebut agar perubahan di local repository kamu mengikuti data terbaru.
-2. Buatlah branch baru dengan nama `feature/feature-name`. Buatlah branch yang benar-benar bisa menjelaskan fitur mana yang sedang kamu kerjakan, contoh : `feature/login`, `feature/forget-password`.
-3. Setiap commit yang kamu buat pastikan benar benar menjelaskan tentang apa yang kamu kerjakan.
-  - Contoh commit yang baik : `Create endpoint login using jwt token`
-  - Contoh commit yang buruk : `commit`, `firhan sudah`, `sudah selesai`, `login`, `kurang sedikit`.
-5. Setelah kamu selesai silahkan pastikan tidak ada error di pekerjaanmu lalu `push` pekerjaan kamu ke remote repository dengan branch yang sama dengan branch yang kamu buat di local repository.
-6. Buatlah Merge Request dengan detail sebagai berikut :
-
-    ![Field Merge Request](./guideline/gitflow/merge-request.gif)
-  
-    - Title : nama fitur yang kamu kerjakan
-    - Description : #kode issue, tambahkan penjelasan jika memang dibutuhkan
-    - Assignees : ternakkode
-    - Reviewers : ternakkode
-    - Milestone : Sesuaikan Sprint (Sprint 1/2/3/dst)
-    - Label : bisa dikosongi (Jika Merge Requestnya Urgent silahkan tambahkan High Priority)
-    - Merge Options : delete source branch when merge request is accepted
-    
-7. Pindahkan issue kamu di board dari `doing` ke `need review` agar maintainer bisa mengecek merge request kamu dengan mudah.
-   
-    ![Move Card To Need Review](./guideline/gitflow/move-card-to-need-review.gif)
-8. Setelah itu selalu pantau issue board, jika `card` yang kamu buat pindah dari `need review` ke `done` maka pekerjaan kamu telah dianggap selesai, namun jika terpindah di `current sprint` dengan tambahan label `need revision` maka cek ulang `merge request` yang kamu buat atau hubungi maintainer untuk memastikan perbaikan seperti apa yang harus dilakukan.
-
-
 ## [WIP] Dependency Libraries
 - @sendgrid/mail
 - bcrypt
+- cors
 - crypto-js
 - dotenv
 - express-validator
@@ -179,7 +152,10 @@ Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API 
   ```json
   {
     "success": false,
-    "message": "Error xyz has occurred"
+    "error": {
+      "code": 500,
+      "message": "Error xyz has occurred"
+    }
   }
   ```
 
@@ -189,11 +165,13 @@ Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API 
   {
       "success": false,
       "message": "Error xyz has occurred",
-      "errors": [
-          "The email must be a valid email",
-          "The password must be at least 6 chaarcters",
-          "The phone number is already used"
-      ],
+      "error": {
+        "code": 422,
+        "message": "error validating user input",
+        "errors": {
+          "field": "KEYWORD_ERROR",
+        }
+      }
   }
   ```
 
@@ -278,34 +256,19 @@ Jangan gunakan kata kerja untuk mendefinisikan url pertama pada sebuah REST API 
 - ### **Validation Middleware**
   
   1. Buat file baru pada folder `helpers/validation/rules` sesuai fitur yang kamu buat. contoh : `users`
-  2. tambahankan kode `const { check } = require('express-validator');` pada bagian paling atas kode kamu.
+  2. require method dari `express-validator` dengan ketentuan berikut :
+     1. Jika ingin validasi body : body
+     2. Jika ingin validasi query params : query
+     3. JIka ingin validasi parameter url : param
   3. Buat array baru untuk validation rules tiap endpoint yang kamu buat.
   4. import validation rule helpers dan file `middleware/requestValidation` lalu tambahkan 2middleware tersebut pada endpoint yang kamu buat.
-  5. Selalu buat custom error message dengan menambahkan method `withMessage('pesan error')`setelah validation rule, contoh :
-    dalam kasus ini, ketika nama tidak diisi api akan otomatis mengirimkan response ke user dengansalah satu data errornya `name should not empty`.
+  5. Selalu buat custom error message dengan menambahkan method `withMessage(KEYWORD_ERROR)`setelah validation rule dan gunakan list wording dari `utils/wording`, contoh :
+    dalam kasus ini, ketika nama tidak diisi api akan otomatis mengirimkan response ke user dengan salah satu data errornya `IS_EMPTY`.
+  6. Agar lebih efisien tambahkan method `bail()` agar ketika selesai memvalidasi sesuatu dan ternyata gagal, proses pengecekan tidak dilanjutkan.
+  7. Contoh : 
   ```javascript
-    check('name')
-      .notEmpty().withMessage('should not empty')
-      .isString().withMessage('should be string')
+    body('name').notEmpty().withMessage(wording.IS_EMPTY).bail()
   ```
-
-  6. Contoh penerapannya bisa kamu cek pada file `helpers/validation/rules/users.js` untuk contoh validation rulesnya dan `routes/api/users/users.route.js` untuk contoh penggunaannya sebagai middleware.
-  7. Jika kamu bingung validation rules apa saja yang bisa dimasukan berikut beberapa contoh umumnya : 
-    - Cek apakah data dikirimkan menggunakan method `notEmpty()`
-    - Cek apakah data dikirimkan dengan format string menggunakan method `isString()`
-    - Memastikan data dikirimkan adalah foreign key salah satu model : 
-  
-      ```javascript
-        check('user_id')
-        .notEmpty().withMessage('should not empty')
-        .custom(value => {
-          return User.findByPk(value).then(user => {
-            if (!user) {
-              return Promise.reject('user not found');
-            }
-          });
-        }),
-      ```
 - ### Penggunaan Middleware
   Contoh Penerapan :
   developer `a` ingin membuat endpoint yang dimana usernya harus `login terlebih dahulu`, `sudah verifikasi email`, `memiliki role admin`, dan `data yang dikirimkan telah tervalidasi oleh validation middleware`. maka untuk penerapannya bisa sebagai berikut

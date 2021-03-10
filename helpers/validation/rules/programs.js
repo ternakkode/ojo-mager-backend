@@ -1,89 +1,73 @@
-const { check } = require('express-validator');
+const { body, query } = require('express-validator');
 
-const { Program, ProgramType, DifficultType } = require('../../../database/models');
+const { Program, ProgramType } = require('../../../database/models');
+
 const generateSlug = require('../../../utils/slug');
+const wording = require('../../../utils/wording');
+
+const index = [
+    query('isRandom').toBoolean()
+];
 
 const create = [
-    check('title')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
-        .custom(title => {
-            const slug = generateSlug(title);
-            return Program.findOne({
-                where: { slug }
-            }).then(program => {
-                if (program) {
-                    return Promise.reject('this program already taken');
-                }
-            })
-        }),
-    check('description')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string'),
-    check('image_url')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string'),
-    check('video_url')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string'),
-    check('duration')
-        .notEmpty().withMessage('should not empty')
-        .isInt().withMessage('should be integer'),
-    check('program_type_id')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
-        .custom(program_type_id => {
-            return ProgramType.findOne({
-                where: { id: program_type_id }
-            }).then(programType => {
-                if (!programType) {
-                    return Promise.reject('program type not valid')
-                }
-            });
+    body('title').notEmpty().withMessage(wording.IS_EMPTY).bail()
+    .custom(title => {
+        const slug = generateSlug(title);
+        return Program.findOne({
+            where: { slug }
+        }).then(program => {
+            if (program) {
+                return Promise.reject(wording.ALREADY_TAKEN);
+            }
         })
-]
+    }),
+    body('description').notEmpty().withMessage(wording.IS_EMPTY).bail(),
+    body('image_url').notEmpty().withMessage(wording.IS_EMPTY).bail(),
+    body('video_url').notEmpty().withMessage(wording.IS_EMPTY).bail(),
+    body('duration').notEmpty().withMessage(wording.IS_EMPTY).bail(),
+    body('program_type_id').notEmpty().withMessage(wording.IS_EMPTY).bail()
+    .custom(program_type_id => {
+        return ProgramType.findOne({
+            where: { id: program_type_id }
+        }).then(programType => {
+            if (!programType) {
+                return Promise.reject(wording.NOT_FOUND)
+            }
+        });
+    })
+];
 
 const update = [
-    check('title')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
-        .custom(title => {
-            const slug = generateSlug(title);
-            return Program.findOne({
-                where: { slug }
-            }).then(program => {
-                if (program) {
-                    return Promise.reject('this program already taken');
-                }
-            })
-        }),
-    check('description')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string'),
-    check('image_url')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string'),
-    check('video_url')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string'),
-    check('duration')
-        .notEmpty().withMessage('should not empty')
-        .isInt().withMessage('should be integer'),
-    check('program_type_id')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
-        .custom(program_type_id => {
-            return ProgramType.findOne({
-                where: { id: program_type_id }
-            }).then(programType => {
-                if (!programType) {
-                    return Promise.reject('program type not valid')
-                }
-            });
+    body('title').notEmpty().withMessage(wording.IS_EMPTY).bail()
+    .custom((title, { req }) => {
+        const slug = generateSlug(title);
+        
+        return Program.findOne({
+            where: { slug }
+        }).then(program => {
+            if (program && req.params.id !== program.id) {
+                return Promise.reject(wording.ALREADY_TAKEN);
+            }
         })
-]
+    }),
+    body('description').notEmpty().withMessage(wording.IS_EMPTY).bail(),
+    body('image_url').notEmpty().withMessage(wording.IS_EMPTY).bail(),
+    body('video_url').notEmpty().withMessage(wording.IS_EMPTY).bail(),
+    body('duration').notEmpty().withMessage(wording.IS_EMPTY).bail(),
+    body('program_type_id').notEmpty().withMessage(wording.IS_EMPTY).bail()
+    .custom(program_type_id => {
+        return ProgramType.findOne({
+            where: { id: program_type_id }
+        }).then(programType => {
+            if (!programType) {
+                return Promise.reject(wording.NOT_FOUND)
+            }
+        });
+    })
+];
 
 module.exports = {
+    index,
     create,
     update
 }
