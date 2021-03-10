@@ -1,7 +1,7 @@
-const { Op, Sequelize } = require('sequelize');
+const { Op } = require('sequelize');
 
 const ApiErrorHandler = require('../../../../helpers/ApiErrorHandler');
-const { Program, ProgramType, User } = require('../../../../database/models')
+const { Program } = require('../../../../database/models')
 const { successApi } = require('../../../../utils/response');
 
 const addFavoritesPrograms = async (req, res, next) => {
@@ -53,42 +53,25 @@ const deleteFavoritesPrograms = async (req, res, next) => {
 const getFavoritesPrograms = async (req, res, next) => {
     try { 
         const { user } = req;
-        const { title, type, limit, isRandom } = req.query;
+        const { title, type } = req.query;
 
         let params = {
-            include: [
-                {
-                    model: ProgramType,
-                    as: 'type'
-                },
-                {
-                    model: User,
-                }
-            ],
-            where: {
-                [Op.and]: [
-                    { '$Users.id$': user.id }
-                ]
-            }
+            scope: 'list',
         }
 
         if (title || type) {
+            params.where = {
+                [Op.and]: [] 
+            }
+
             if (title) params.where[Op.and].push({ title: { [Op.iLike]: `%${title}%` } });
             if (type) params.where[Op.and].push({ '$type.name$': type });
         }
 
-        if (limit) {
-            params.limit = limit;
-        }
+        const program = await user.getPrograms(params)
 
-        if (isRandom) {
-            params.order = Sequelize.literal('random()')
-        }
-
-        const program = await Program.findAll(params);
-        
         if (!program) {
-            throw new ApiErrorHandler(400, 'program not found');
+            throw new ApiErrorHandler(404, 'program not found');
         }
 
         res.json(

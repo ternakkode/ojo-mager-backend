@@ -5,7 +5,7 @@ const jwtMiddleware = require('../../../../middleware/jwtPassport');
 const isVerified = require('../../../../middleware/isVerified');
 
 favoritesProgramsRoute.post(
-    ':program_id',
+    '/:program_id',
     jwtMiddleware,
     isVerified,
     favoritesProgramsController.addFavoritesPrograms
@@ -17,7 +17,7 @@ favoritesProgramsRoute.get(
     favoritesProgramsController.getFavoritesPrograms
 );
 favoritesProgramsRoute.delete(
-    ':program_id',
+    '/:program_id',
     jwtMiddleware,
     isVerified,
     favoritesProgramsController.deleteFavoritesPrograms

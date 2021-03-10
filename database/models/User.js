@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "user_id"
       })
       User.belongsToMany(models.Program, {
+        as: 'programs',
         through: models.FavoriteProgram,
         foreignKey: 'user_id'
       });
