@@ -1,18 +1,14 @@
-const { check } = require('express-validator');
+const { body } = require('express-validator');
 
-const { Tool } = require('../../../database/models');
+const wording = require('../../../utils/wording');
 
 const create = [
-    check('name')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
-]
+    body('name').notEmpty().withMessage(wording.IS_EMPTY).bail()
+];
 
 const update = [
-    check('name')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
-]
+    body('name').notEmpty().withMessage(wording.IS_EMPTY).bail()
+];
 
 module.exports = {
     create,

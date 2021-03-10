@@ -1,78 +1,65 @@
-const { check, query } = require('express-validator');
+const { body, query } = require('express-validator');
 
 const { ArticleCategory, Article } = require('../../../database/models');
-const generateSlug = require('../../../utils/slug')
+const generateSlug = require('../../../utils/slug');
+const wording = require('../../../utils/wording');
 
 const index = [
     query('isRandom').toBoolean()
-]
+];
 
 const create = [
-    check('title')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
-        .custom(title => {
-            const slug = generateSlug(title);
-            return Article.findOne({
-                where: { slug }
-            }).then(article => {
-                if (article) {
-                    return Promise.reject('already taken');
-                }
-            })
+    body('title').notEmpty().withMessage(wording.IS_EMPTY).bail()
+    .custom(title => {
+        const slug = generateSlug(title);
+        
+        return Article.findOne({
+            where: { slug }
+        }).then(article => {
+            if (article) {
+                return Promise.reject(wording.ALREADY_TAKEN);
+            }
+        });
     }),
-    check('category_id')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
-        .custom(category_id => {
-            return ArticleCategory.findOne({
-                where: { id:category_id }
-            }).then(articleCategory => {
-                if (!articleCategory) {
-                    return Promise.reject('category not valid');
-                }
-            });
-        }),
-    check('image_url')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string'),
-    check('content')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
+    body('category_id').notEmpty().withMessage(wording.IS_EMPTY).bail()
+    .custom(category_id => {
+        return ArticleCategory.findOne({
+            where: { id:category_id }
+        }).then(articleCategory => {
+            if (!articleCategory) {
+                return Promise.reject(wording.NOT_FOUND);
+            }
+        });
+    }).bail(),
+    body('image_url').notEmpty().withMessage(wording.IS_EMPTY).bail(),
+    body('content').notEmpty().withMessage(wording.IS_EMPTY).bail()
 ];
 
 const update = [
-    check('title')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
-        .custom(title => {
-            const slug = generateSlug(title);
-            return Article.findOne({
-                where: { slug }
-            }).then(article => {
-                if (article) {
-                    return Promise.reject('this article already taken');
-                }
-            })
-        }),
-    check('category_id')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
-        .custom(category_id => {
-            return ArticleCategory.findOne({
-                where: { id:category_id }
-            }).then(articleCategory => {
-                if (!articleCategory) {
-                    return Promise.reject('article category not valid');
-                }
-            });
-        }),
-    check('image_url')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string'),
-    check('content')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
+    body('title').notEmpty().withMessage(wording.IS_EMPTY).bail()
+    .custom((title, { req }) => {
+        const slug = generateSlug(title);
+        
+        return Article.findOne({
+            where: { slug }
+        }).then(article => {
+            if (article && article.id !== req.params.id) {
+                return Promise.reject(wording.ALREADY_TAKEN);
+            }
+        })
+    }).bail(),
+    body('category_id').notEmpty().withMessage(wording.IS_EMPTY).bail()
+    .custom(category_id => {
+        return ArticleCategory.findOne({
+            where: { id:category_id }
+        }).then(articleCategory => {
+            if (!articleCategory) {
+                return Promise.reject(wording.NOT_FOUND);
+            }
+        });
+    }).bail(),
+    body('image_url').notEmpty().withMessage(wording.IS_EMPTY).bail(),
+    body('content').notEmpty().withMessage(wording.IS_EMPTY).bail()
 ];
 
 

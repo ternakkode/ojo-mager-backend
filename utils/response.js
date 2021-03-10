@@ -15,7 +15,7 @@ const successApi = (message, data = {}) => {
     }
 }
 
-const failedApi = (code, message, data = []) => {
+const failedApi = (code, message, data = {}) => {
     let rest = {
         success: false,
         error: {
@@ -23,8 +23,8 @@ const failedApi = (code, message, data = []) => {
             message
         }
     }
-
-    if (data.length > 0) {
+    
+    if (Object.keys(data).length > 0) {
         rest.error.errors = data;
     }
 
