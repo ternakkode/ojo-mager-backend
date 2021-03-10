@@ -184,9 +184,9 @@ const saveNewForgotPassword = async (req, res, next) => {
 
 const newVerificationAccount = async (req, res, next) => {
     try {
-        const { id } = req.body;
+        const { user_id } = req.body;
 
-        const user = await User.findByPk(id);
+        const user = await User.findByPk(user_id);
 
         if(!user) {
             throw new ApiErrorHandler(400, 'User not found');
@@ -199,7 +199,7 @@ const newVerificationAccount = async (req, res, next) => {
         const verificationCode = cryptoHelper.generateRandomAccountCode('verification', user.email);
 
         const existVerificationCode = await UserCode.findOne({
-            where: { user_id : id, type: 'verification' }
+            where: { user_id : user_id, type: 'verification' }
         });
         
         if(existVerificationCode) {
@@ -209,7 +209,7 @@ const newVerificationAccount = async (req, res, next) => {
         } else {
             await UserCode.create({
                 id: nanoid(),
-                user_id: id,
+                user_id: user_id,
                 type: 'verification',
                 code: verificationCode,
                 is_available: true
