@@ -5,13 +5,13 @@ const usersValidationRule = require('../../../../helpers/validation/rules/users'
 const requestValidationMiddleware = require('../../../../middleware/requestValidation');
 
 verificationRoute.post(
-    '/verification/new', 
+    '/new', 
     usersValidationRule.newVerificationAccount,
     requestValidationMiddleware,
     verificationController.newVerificationAccount
 );
 verificationRoute.post(
-    '/verification/verify', 
+    '/verify', 
     usersValidationRule.verifyVerification,
     requestValidationMiddleware,
     verificationController.verifyVerificationAccount
