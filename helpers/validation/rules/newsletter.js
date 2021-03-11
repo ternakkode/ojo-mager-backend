@@ -1,12 +1,10 @@
-const { check } = require('express-validator');
+const { body } = require('express-validator');
+
+const wording = require('../../../utils/wording');
 
 const broadcast = [
-    check('title')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string'),
-    check('message')
-        .notEmpty().withMessage('should not empty')
-        .isString().withMessage('should be string')
+    body('title').notEmpty().withMessage(wording.IS_EMPTY).bail(),
+    body('message').notEmpty().withMessage(wording.IS_EMPTY).bail()
 ];
 
 module.exports = {

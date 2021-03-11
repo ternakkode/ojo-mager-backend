@@ -5,7 +5,9 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Tool extends Model {
     static associate(models) {
-      this.belongsToMany(models.Program, { as: 'ToolsInProgram',through: models.ProgramTool, foreignKey: 'tool_id' });
+      this.belongsToMany(models.Program, { 
+        as: 'programs',through: models.ProgramTool, foreignKey: 'tool_id' 
+      });
     }
   };
   Tool.init({

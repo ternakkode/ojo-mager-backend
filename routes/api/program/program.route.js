@@ -9,6 +9,8 @@ const verifyRoles = require('../../../middleware/verifiyRoles');
 
 programsRoute.get(
     '/',
+    programsValidationRule.index,
+    requestValidationMiddleware,
     programsController.index
 );
 programsRoute.get(

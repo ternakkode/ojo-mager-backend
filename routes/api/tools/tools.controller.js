@@ -1,14 +1,15 @@
 const { nanoid } = require('nanoid');
 
-const { Tool } = require('../../../database/models');
 const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
+const wording = require('../../../utils/wording');
+const { Tool } = require('../../../database/models');
 const { successApi } = require('../../../utils/response');
 
 const index = async (req, res, next) => {
     try {
         const tool = await Tool.findAll();
         if(tool == 0) {
-            throw new ApiErrorHandler(400, "Tool data not found")
+            throw new ApiErrorHandler(404, wording.TOOL_NOT_FOUND)
         }
 
         res.status(201).json(
@@ -27,11 +28,11 @@ const detail = async (req, res, next) => {
             where: { id }
         });
         if(!toolById) {
-            throw new ApiErrorHandler(400, "Tool data not found")
+            throw new ApiErrorHandler(404, wording.TOOL_NOT_FOUND)
         }
 
         res.json(
-            successApi('Sucessfully find tool by id', toolById)
+            successApi('sucessfully find tool by id', toolById)
         );
     } catch (err) {
         next(err);
@@ -60,18 +61,16 @@ const update = async (req, res, next) => {
         const { id } = req.params;
         const { name } = req.body;
 
-        const updateToolById = await Tool.update({
-            name
-        }, {
-            where: { id }
-        });
-
-        if(updateToolById == 0) {
-            throw new ApiErrorHandler(400, "Tool data not found")
+        const tool = await Tool.findByPk(id);
+        if (!tool) {
+            throw new ApiErrorHandler(404, wording.TOOL_NOT_FOUND)
         }
 
+        tool.name = name;
+        tool.save();
+
         res.json(
-            successApi(`Sucessfully update ${updateToolById} tool data`)
+            successApi('sucessfully update tool data', tool)
         );
     } catch (err) {
         next(err);
@@ -82,16 +81,15 @@ const remove = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const deleteToolById = await Tool.destroy({
-            where: { id }
-        });
-
-        if (deleteToolById == 0) {
-            throw new ApiErrorHandler(400, "Tool data not found")
+        const tool = await Tool.findByPk(id);
+        if (!tool) {
+            throw new ApiErrorHandler(404, wording.TOOL_NOT_FOUND)
         }
 
+        tool.destroy();
+
         res.json(
-            successApi(`Sucessfully delete ${deleteToolById} tool data`)
+            successApi('sucessfully delete tool data', tool)
         );
     } catch (err) {
         next(err);
