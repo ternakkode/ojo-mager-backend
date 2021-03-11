@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "build": "sequelize db:migrate:undo:all && sequelize db:migrate",
+    "build": "sequelize db:migrate:undo:all && sequelize db:migrate && sequelize db:seed:all",
     "dev": "nodemon index"
   },
   "author": "Group C",
