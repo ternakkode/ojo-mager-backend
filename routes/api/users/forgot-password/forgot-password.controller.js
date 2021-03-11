@@ -4,6 +4,7 @@ const ApiErrorHandler = require('../../../../helpers/ApiErrorHandler');
 const cryptoHelper = require('../../../../helpers/crypto')
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
 const SendgridHelper = require('../../../../helpers/SendgridHelper');
+const wording = require('../../../../utils/wording');
 const { successApi } = require('../../../../utils/response');
 const { User, UserCode, } = require('../../../../database/models')
 
@@ -17,7 +18,7 @@ const newForgotPassword = async (req, res, next) => {
         })
 
         if (!user) {
-            throw new ApiErrorHandler(404, 'user not found')
+            throw new ApiErrorHandler(404, wording.USER_NOT_FOUND)
         }
         
         const existForgotPasswordCode = await UserCode.findOne({
@@ -61,7 +62,7 @@ const validateForgotPassword = async (req, res, next) => {
         })
 
         if (!userCode) {
-            throw new ApiErrorHandler(404, 'code is invalid');
+            throw new ApiErrorHandler(404, wording.CODE_NOT_FOUND);
         }
         
         res.json(
@@ -88,7 +89,7 @@ const saveNewForgotPassword = async (req, res, next) => {
         });
 
         if (!userCode || !userCode.is_available) {
-            throw new ApiErrorHandler(404, 'User codes not valid')
+            throw new ApiErrorHandler(404, wording.CODE_NOT_FOUND)
         }
         
         userCode.is_available = false;
