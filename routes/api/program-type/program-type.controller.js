@@ -1,7 +1,8 @@
 const { nanoid } = require("nanoid");
 
-const { ProgramType } = require('../../../database/models')
 const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
+const wording = require('../../../utils/wording');
+const { ProgramType } = require('../../../database/models')
 const { successApi } = require('../../../utils/response');
 
 const create = async (req, res, next) => {
@@ -13,7 +14,7 @@ const create = async (req, res, next) => {
         });
 
         res.status(201).json(
-            successApi("successfulyl create Program Type", programType)
+            successApi("sucessfully create program type", programType)
         )
     } catch (err) {
         next(err);
@@ -24,11 +25,11 @@ const index = async (req, res, next) => {
     try {
         const programType = await ProgramType.findAll();
         if (!programType) {
-            throw new ApiErrorHandler("program type data not found")
+            throw new ApiErrorHandler(404, wording.PROGRAM_TYPE_NOT_FOUND)
         }
 
         res.json(
-            successApi("successfuly fetch all program Types data", programType)
+            successApi("successfuly fetch all program type data", programType)
         );
     } catch (err) {
         next(err);
@@ -41,7 +42,7 @@ const detail = async (req, res, next) => {
 
         const programType = await ProgramType.findByPk(id);
         if (!programType) {
-            throw new ApiErrorHandler(400, "program type data not found")
+            throw new ApiErrorHandler(404, wording.PROGRAM_TYPE_NOT_FOUND)
         }
 
         res.json(
@@ -57,13 +58,16 @@ const update = async (req, res, next) => {
         const { id } = req.params;
         const { name } = req.body;
 
-        const programType = await ProgramType.update({ name }, { where: { id } });
-        if (programType == 0) {
-            throw new ApiErrorHandler(400, "program type data not found")
+        const programType = await ProgramType.findByPk(id);
+        if (!programType) {
+            throw new ApiErrorHandler(404, wording.PROGRAM_TYPE_NOT_FOUND)
         }
 
+        programType.name = name;
+        await programType.save();
+
         res.json(
-            successApi(`successfuly update ${programType} program type data`)
+            successApi('sucessfully update program type data', programType)
         );
     } catch (err) {
         next(err);
@@ -74,16 +78,15 @@ const remove = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const deletedProgramType = await ProgramType.destroy({
-            where: { id }
-        })
-
-        if (deletedProgramType == 0) {
-            throw new ApiErrorHandler(400, "program type data not found")
+        const programType = await ProgramType.findByPk(id);
+        if (!programType) {
+            throw new ApiErrorHandler(404, wording.PROGRAM_TYPE_NOT_FOUND)
         }
 
+        await programType.destroy();
+
         res.json(
-            successApi(`successfuly delete ${deletedProgramType} program type data`)
+            successApi('sucessfully delete program type data')
         );
     } catch (err) {
         next(err);
