@@ -1,7 +1,8 @@
 const { nanoid } = require("nanoid");
 
-const { ArticleCategory } = require('../../../database/models')
 const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
+const wording = require('../../../utils/wording');
+const { ArticleCategory } = require('../../../database/models')
 const { successApi } = require('../../../utils/response');
 
 const create = async (req, res, next) => {
@@ -13,7 +14,7 @@ const create = async (req, res, next) => {
         });
 
         res.status(201).json(
-            successApi("successfulyl create article category", articleCategory)
+            successApi("sucessfully create article category", articleCategory)
         )
     } catch (err) {
         next(err);
@@ -23,8 +24,8 @@ const create = async (req, res, next) => {
 const index = async (req, res, next) => {
     try {
         const articleCategories = await ArticleCategory.findAll();
-        if (!ArticleCategory) {
-            throw new ApiErrorHandler("article category data not found")
+        if (!articleCategories) {
+            throw new ApiErrorHandler(404, wording.ARTICLE_CATEGORY_NOT_FOUND)
         }
 
         res.json(
@@ -41,7 +42,7 @@ const detail = async (req, res, next) => {
 
         const articleCategory = await ArticleCategory.findByPk(id);
         if (!articleCategory) {
-            throw new ApiErrorHandler(400, "article category data not found")
+            throw new ApiErrorHandler(404, wording.ARTICLE_CATEGORY_NOT_FOUND)
         }
         
         res.json(
@@ -57,13 +58,16 @@ const update = async (req, res, next) => {
         const { id } = req.params;
         const { name } = req.body;
 
-        const articleCategory = await ArticleCategory.update({ name }, { where: { id } });
-        if (articleCategory == 0) {
-            throw new ApiErrorHandler(400, "article category data not found")
+        const articleCategory = await ArticleCategory.findByPk(id);
+        if (!articleCategory) {
+            throw new ApiErrorHandler(404, wording.ARTICLE_CATEGORY_NOT_FOUND)
         }
+
+        articleCategory.name = name;
+        await articleCategory.save();
     
         res.json(
-            successApi(`successfuly update ${articleCategory} article category data`)
+            successApi('sucessfully update article category data', articleCategory)
         );
     } catch (err) {
         next(err);
@@ -74,16 +78,15 @@ const remove = async (req, res, next) => {
     try {
         const { id } = req.params;
     
-        const deletedArticleCategory = await ArticleCategory.destroy({
-            where: { id }
-        })
-    
-        if (deletedArticleCategory == 0) {
-            throw new ApiErrorHandler(400, "article category data not found")   
+        const articleCategory = await ArticleCategory.findByPk(id);
+        if (!articleCategory) {
+            throw new ApiErrorHandler(404, wording.ARTICLE_CATEGORY_NOT_FOUND)
         }
+        
+        await articleCategory.destroy();
     
         res.json(
-            successApi(`successfuly delete ${deletedArticleCategory} article category data`)
+            successApi('sucessfully delete article category data', articleCategory)
         );
     } catch (err) {
         next(err);
