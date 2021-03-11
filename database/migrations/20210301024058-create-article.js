@@ -25,7 +25,7 @@ module.exports = {
       },
       image_url: {
         allowNull: false,
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(255)
       },
       content: {
         allowNull: false,

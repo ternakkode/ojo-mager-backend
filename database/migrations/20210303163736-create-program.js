@@ -16,15 +16,15 @@ module.exports = {
         allowNull: false
       },
       description: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: false
       },
       image_url: {
-        type: Sequelize.STRING(100),
+        type: Sequelize.STRING(255),
         allowNull: false
       },
       video_url: {
-        type: Sequelize.STRING(100),
+        type: Sequelize.STRING(255),
         allowNull: false
       },
       duration: {
