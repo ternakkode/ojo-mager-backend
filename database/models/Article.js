@@ -1,6 +1,5 @@
 'use strict';
 const ApiErrorHandler = require('../../helpers/ApiErrorHandler');
-const timeUtils = require('../../utils/time');
 
 const {
   Model
@@ -25,25 +24,6 @@ module.exports = (sequelize, DataTypes) => {
     category_id: DataTypes.STRING,
     image_url: DataTypes.STRING,
     content: DataTypes.TEXT,
-    truncated_content: {
-      type: DataTypes.VIRTUAL,
-      get() {
-        return this.content.substring(0,130) + '...';
-      },
-      set(value) {
-        throw new ApiErrorHandler('Do not try to set the `truncated_content` value!');
-      }
-    },
-    published_at: {
-      type: DataTypes.VIRTUAL,
-      get() {
-        const parsedDate = new Date(this.createdAt)
-        return timeUtils.indonesianDateFormat(parsedDate)
-      },
-      set(value) {
-        throw new ApiErrorHandler('Do not try to set the `published_at` value!');
-      }
-    }
   }, {
     sequelize,
     tableName: 'articles',

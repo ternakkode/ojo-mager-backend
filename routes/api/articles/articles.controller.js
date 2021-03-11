@@ -1,9 +1,12 @@
 const { nanoid } = require("nanoid");
 const { Op, Sequelize } = require("sequelize");
 
-const { Article, ArticleCategory, User } = require('../../../database/models')
 const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
-const generateSlug = require('../../../utils/slug')
+const articleTransformer = require('../../../helpers/transformer/article');
+const generateSlug = require('../../../utils/slug');
+const wording = require('../../../utils/wording');
+
+const { Article, ArticleCategory, User } = require('../../../database/models')
 const { successApi } = require('../../../utils/response')
 
 const create = async (req, res, next) => {
@@ -66,11 +69,11 @@ const index = async (req, res, next) => {
         const articles = await Article.findAll(params);
 
         if (articles.length == 0) {
-            throw new ApiErrorHandler(400, "article not found");
+            throw new ApiErrorHandler(404, wording.ARTICLE_NOT_FOUND);
         }
 
         res.json(
-            successApi("sucessfully get article data", articles)
+            successApi("sucessfully get article data", articleTransformer.list(articles))
         );
     } catch (err) {
         next(err);
@@ -85,18 +88,24 @@ const detail = async (req, res, next) => {
             where: {
                 slug
             },
-            include: {
-                model: ArticleCategory,
-                as: 'category'
-            }
+            include: [
+                {
+                    model: ArticleCategory,
+                    as: 'category'
+                },
+                {
+                    model: User,
+                    as: 'publisher'
+                }
+            ]
         });
 
         if (!article) {
-            throw new ApiErrorHandler(400, "article data not found");
+            throw new ApiErrorHandler(404, wording.ARTICLE_NOT_FOUND);
         }
 
         res.json(
-            successApi("successfully get article data", article)
+            successApi("successfully get article data", articleTransformer.detail(article.toJSON()))
         )
     } catch (err) {
         next(err);
@@ -108,16 +117,20 @@ const update = async (req, res, next) => {
         const { id } = req.params;
         const { title, category_id, image_url, content } = req.body;
 
-        const article = await Article.update({ 
-            slug: generateSlug(title), title, category_id, image_url, content
-         }, { where: { id } });
-
-        if (article == 0) {
-            throw new ApiErrorHandler(400, "article category data not found")
+        const article = await Article.findByPk(id);
+        if (!article) {
+            throw new ApiErrorHandler(404, wording.ARTICLE_NOT_FOUND);
         }
 
+        article.slug = generateSlug(title);
+        article.title = title;
+        article.category_id = category_id;
+        article.image_url = image_url;
+        article.content = content;
+        await article.save();
+
         res.json(
-            successApi(`successfuly update ${article} article data`)
+            successApi('sucessfully update article data', article)
         );
     } catch (err) {
         next(err);
@@ -128,16 +141,15 @@ const remove = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const deletedArticle = await Article.destroy({
-            where: { id }
-        });
-
-        if (deletedArticle == 0) {
-            throw new ApiErrorHandler(400, "article category data not found")   
+        const article = await Article.findByPk(id);
+        if (!article) {
+            throw new ApiErrorHandler(404, wording.ARTICLE_NOT_FOUND);
         }
 
+        await article.destory();
+
         res.json(
-            successApi(`successfuly delete ${deletedArticle} article data`)
+            successApi('sucessfully delete article data', article)
         )
     } catch (err) {
         next(err);
