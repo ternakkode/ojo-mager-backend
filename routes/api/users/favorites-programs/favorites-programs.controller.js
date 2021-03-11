@@ -1,7 +1,9 @@
 const { Op } = require('sequelize');
 
 const ApiErrorHandler = require('../../../../helpers/ApiErrorHandler');
-const { Program } = require('../../../../database/models')
+const programTransformer = require('../../../../helpers/transformer/program');
+const wording = require('../../../../utils/wording');
+const { Program, ProgramType } = require('../../../../database/models')
 const { successApi } = require('../../../../utils/response');
 
 const addFavoritesPrograms = async (req, res, next) => {
@@ -14,7 +16,7 @@ const addFavoritesPrograms = async (req, res, next) => {
         });
 
         if (!program) {
-            throw new ApiErrorHandler(404, 'program not found');
+            throw new ApiErrorHandler(404, wording.PROGRAM_NOT_FOUND);
         }
 
         await user.addProgram(program);
@@ -37,7 +39,7 @@ const deleteFavoritesPrograms = async (req, res, next) => {
         });
 
         if (!program) {
-            throw new ApiErrorHandler(404, 'program not found');
+            throw new ApiErrorHandler(404, wording.PROGRAM_NOT_FOUND);
         }
 
         await user.removeProgram(program);
@@ -56,7 +58,10 @@ const getFavoritesPrograms = async (req, res, next) => {
         const { title, type } = req.query;
 
         let params = {
-            scope: 'list',
+            include: [{
+                model: ProgramType,
+                as: 'type'
+            }],
         }
 
         if (title || type) {
@@ -68,14 +73,14 @@ const getFavoritesPrograms = async (req, res, next) => {
             if (type) params.where[Op.and].push({ '$type.name$': type });
         }
 
-        const program = await user.getPrograms(params)
+        const programs = await user.getPrograms(params)
 
-        if (!program) {
-            throw new ApiErrorHandler(404, 'program not found');
+        if (!programs) {
+            throw new ApiErrorHandler(404, wording.PROGRAM_NOT_FOUND);
         }
 
         res.json(
-            successApi('sucefully get favorite program', program)
+            successApi('sucefully get favorite program', programTransformer.list(programs))
         );
     } catch (err) {
         next(err);

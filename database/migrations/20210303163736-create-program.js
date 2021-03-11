@@ -35,10 +35,6 @@ module.exports = {
         type: Sequelize.STRING(22),
         allowNull: false,
       },
-      difficulty_type_id: {
-        type: Sequelize.STRING(22),
-        allowNull: false,
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

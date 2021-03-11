@@ -1,6 +1,6 @@
 const { body, query } = require('express-validator');
 
-const { Program, ProgramType } = require('../../../database/models');
+const { Tool, Program, ProgramType } = require('../../../database/models');
 
 const generateSlug = require('../../../utils/slug');
 const wording = require('../../../utils/wording');
@@ -34,7 +34,20 @@ const create = [
                 return Promise.reject(wording.NOT_FOUND)
             }
         });
-    })
+    }),
+    body('tools').notEmpty().withMessage(wording.IS_EMPTY).bail()
+    .isArray().withMessage(wording.NOT_ARRAY).bail()
+    .custom(tools => {
+        return Tool.findAll({
+            where: {
+                id: tools,
+            }
+        }).then(result => {
+            if (result.length != tools.length) {
+                return Promise.reject(wording.NOT_FOUND)
+            }
+        });
+    }).bail()
 ];
 
 const update = [
@@ -63,7 +76,20 @@ const update = [
                 return Promise.reject(wording.NOT_FOUND)
             }
         });
-    })
+    }),
+    body('tools').notEmpty().withMessage(wording.IS_EMPTY).bail()
+    .isArray().withMessage(wording.NOT_ARRAY).bail()
+    .custom(tools => {
+        return Tool.findAll({
+            where: {
+                id: tools,
+            }
+        }).then(result => {
+            if (result.length != tools.length) {
+                return Promise.reject(wording.NOT_FOUND)
+            }
+        });
+    }).bail()
 ];
 
 module.exports = {
