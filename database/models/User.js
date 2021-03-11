@@ -4,12 +4,6 @@ const bcryptHelper = require('../../helpers/bcrypt');
 
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    toJSON = function () {
-      let values = this.get();
-  
-      delete values.password;
-      return values;
-    }
     static associate(models) {
       User.hasMany(models.UserCode, {
         as: 'codes',

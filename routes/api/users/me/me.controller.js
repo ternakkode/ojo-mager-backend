@@ -1,10 +1,11 @@
 const ApiErrorHandler = require('../../../../helpers/ApiErrorHandler');
+const userTransfomer = require('../../../../helpers/transformer/user')
 const { successApi } = require('../../../../utils/response');
 
 const profileInfo = async (req, res, next) => {
     try {
         res.json(
-            successApi('successfully fetch user data', req.user)
+            successApi('successfully fetch user data', userTransfomer.detail(req.user.toJSON()))
         )
     } catch {
         next(err);

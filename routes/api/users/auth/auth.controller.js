@@ -3,6 +3,8 @@ const { nanoid } = require('nanoid');
 const ApiErrorHandler = require('../../../../helpers/ApiErrorHandler');
 const bcryptHelper = require('../../../../helpers/bcrypt');
 const jwtHelper = require('../../../../helpers/jwt');
+const userTransfomer = require('../../../../helpers/transformer/user')
+const wording = require('../../../../utils/wording');
 const { successApi } = require('../../../../utils/response');
 const { User} = require('../../../../database/models')
 
@@ -21,7 +23,9 @@ const register = async (req, res, next) => {
         });
 
         res.status(201).json(
-            successApi('sucessfully register', user)
+            successApi('sucessfully register', userTransfomer.detail(
+                user.toJSON()
+            ))
         );
     } catch (err) {
         next(err);
@@ -37,18 +41,20 @@ const login = async (req, res, next) => {
         });
 
         if (!user) {
-            throw new ApiErrorHandler(404, 'user not found');
+            throw new ApiErrorHandler(404, wording.USER_NOT_FOUND);
         }
 
         const comparePassword = await bcryptHelper.comparePassword(password, user.password);
         if (!comparePassword) {
-            throw new ApiErrorHandler(401, 'password doesnt match');
+            throw new ApiErrorHandler(401, wording.WRONG_PASSWORD);
         }
 
         const token = jwtHelper.generateJwtToken(user.id)
 
         res.json(
-            successApi('sucessfully login', {user, token })
+            successApi('sucessfully login', {user: userTransfomer.detail(
+                user.toJSON()
+            ), token })
         );
     } catch (err) {
         next(err);
