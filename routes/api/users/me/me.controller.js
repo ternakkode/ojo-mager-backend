@@ -17,12 +17,13 @@ const editProfile = async (req, res, next) => {
         const { user } = req;
         const { name, password, is_subscribe_newsletter } = req.body;
 
-        await User.update({
-            name, password, is_subscribe_newsletter
-        }, { where: { id: user.id } });
+        user.name = name;
+        user.password = password;
+        user.is_subscribe_newsletter = is_subscribe_newsletter;
+        await user.save();
 
         res.json(
-            successApi('success update user information')
+            successApi('success update user information', userTransfomer.detail(user.toJSON()))
         )
     } catch {
         next(err);

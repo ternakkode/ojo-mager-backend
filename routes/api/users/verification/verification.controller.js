@@ -4,6 +4,7 @@ const ApiErrorHandler = require('../../../../helpers/ApiErrorHandler');
 const cryptoHelper = require('../../../../helpers/crypto')
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
 const SendgridHelper = require('../../../../helpers/SendgridHelper');
+const wording = require('../../../../utils/wording');
 const { successApi } = require('../../../../utils/response');
 const { User, UserCode, } = require('../../../../database/models')
 
@@ -14,11 +15,11 @@ const newVerificationAccount = async (req, res, next) => {
         const user = await User.findByPk(user_id);
 
         if(!user) {
-            throw new ApiErrorHandler(404, 'user not found');
+            throw new ApiErrorHandler(404, wording.USER_NOT_FOUND);
         }
 
         if(user.is_verified) {
-            throw new ApiErrorHandler(400, 'user already verified');
+            throw new ApiErrorHandler(400, wording.ALREADY_VERIFIED);
         }
 
         const verificationCode = cryptoHelper.generateRandomAccountCode('verification', user.email);
@@ -45,7 +46,7 @@ const newVerificationAccount = async (req, res, next) => {
         sendgridHelper.sendTextMail(
             user.email,
             'Harap Verifikasi Akun Anda',
-            `Silahkan verifikasi akun anda melalui url berikut : ${frontendUrl}/verification/process?code=${verificationCode}`
+            `Halo ${user.name}, Anda telah registrasi pada web OjoMager. Silahkan verifikasi akun anda melalui url berikut : ${frontendUrl}/verification/process?code=${verificationCode}`
         );
 
         res.json(
@@ -69,7 +70,7 @@ const verifyVerificationAccount = async (req, res, next) => {
         })
 
         if(!verificationCode) { 
-            throw new ApiErrorHandler(404, 'verification code invalid');
+            throw new ApiErrorHandler(404, wording.CODE_NOT_FOUND);
         }
 
         await verificationCode.user.update({is_verified: true});

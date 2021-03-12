@@ -47,7 +47,7 @@ const newForgotPassword = async (req, res, next) => {
         );
 
         res.json(
-            successApi('Berhasil Mengirim Email')
+            successApi('sucessfully request reset password code')
         );
     } catch (err) {
         next(err);

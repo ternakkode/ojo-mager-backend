@@ -13,6 +13,12 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 app.use('/api', apiRoutes);
+app.use('*', (req, res) => {
+    res.json({
+        success: true,
+        message: 'OjoMager API'
+    })
+})
 
 sequelize.authenticate().then(() => {
     console.log('Connection to postgresql database has been established successfully.');
