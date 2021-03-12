@@ -2,7 +2,7 @@ const { nanoid } = require('nanoid');
 
 const ApiErrorHandler = require('../../../../helpers/ApiErrorHandler');
 const cryptoHelper = require('../../../../helpers/crypto')
-const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
+const frontendUrl = process.env.FRONTEND_URL || 'https://ojo-mager.herokuapp.com';
 const SendgridHelper = require('../../../../helpers/SendgridHelper');
 const wording = require('../../../../utils/wording');
 const { successApi } = require('../../../../utils/response');
@@ -61,8 +61,8 @@ const validateForgotPassword = async (req, res, next) => {
             where: { code }
         })
 
-        if (!userCode) {
-            throw new ApiErrorHandler(404, wording.CODE_NOT_FOUND);
+        if (!userCode || !userCode.is_available) {
+            throw new ApiErrorHandler(404, wording.CODE_NOT_FOUND)
         }
         
         res.json(
