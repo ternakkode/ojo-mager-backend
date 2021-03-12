@@ -69,7 +69,11 @@ const verifyVerificationAccount = async (req, res, next) => {
             }
         })
 
-        if(!verificationCode) { 
+        if(verificationCode.user.is_verified) {
+            throw new ApiErrorHandler(400, wording.ALREADY_VERIFIED);
+        }
+
+        if(!verificationCode || !verificationCode.is_available) { 
             throw new ApiErrorHandler(404, wording.CODE_NOT_FOUND);
         }
 
