@@ -1,6 +1,7 @@
 const wording = new Object();
 
 wording.ALREADY_TAKEN = 'ALREADY_TAKEN';
+wording.ALREADY_VERIFIED = 'ALREADY_VERIFIED';
 wording.IS_EMPTY = 'IS_EMPTY';
 wording.NOT_ARRAY = 'NOT_ARRAY';
 wording.NOT_EMAIL_FORMATTED = 'NOT_EMAIL_FORMATTED';
