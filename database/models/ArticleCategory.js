@@ -12,10 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   ArticleCategory.init({
-    name: DataTypes.STRING
+    name: DataTypes.STRING,
+    button_color_code: DataTypes.STRING
   }, {
     sequelize,
-    timestamps: false,
     tableName: 'article_categories',
     modelName: 'ArticleCategory',
   });

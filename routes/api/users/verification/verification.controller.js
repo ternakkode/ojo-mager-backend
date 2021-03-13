@@ -62,7 +62,7 @@ const verifyVerificationAccount = async (req, res, next) => {
         const { code } = req.body;
         
         const verificationCode = await UserCode.findOne({
-            where: { code },
+            where: { code, type: 'verification' },
             include: {
                 model: User,
                 as: 'user'
