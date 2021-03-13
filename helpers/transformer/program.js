@@ -20,7 +20,7 @@ function detail(payload) {
         id: payload.id,
         slug: payload.slug,
         program_type_name: payload.type?.name,
-        program_type_button_color_code: program.type?.button_color_code,
+        program_type_button_color_code: payload.type?.button_color_code,
         tools: payload.tools?.map(tool => tool.name) || [],
         title: payload.title,
         description: payload.description,
