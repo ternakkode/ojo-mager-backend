@@ -12,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   ProgramType.init({
-    name: DataTypes.STRING
+    name: DataTypes.STRING,
+    button_color_code: DataTypes.STRING
   }, {
     sequelize,
     tableName: 'program_types',

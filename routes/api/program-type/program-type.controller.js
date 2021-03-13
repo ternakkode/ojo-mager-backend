@@ -7,10 +7,11 @@ const { successApi } = require('../../../utils/response');
 
 const create = async (req, res, next) => {
     try {
-        const { name } = req.body;
+        const { name, button_color_code } = req.body;
         const programType = await ProgramType.create({
             id: nanoid(),
-            name
+            name,
+            button_color_code
         });
 
         res.status(201).json(
@@ -56,7 +57,7 @@ const detail = async (req, res, next) => {
 const update = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { name } = req.body;
+        const { name, button_color_code } = req.body;
 
         const programType = await ProgramType.findByPk(id);
         if (!programType) {
@@ -64,6 +65,7 @@ const update = async (req, res, next) => {
         }
 
         programType.name = name;
+        programType.button_color_code = button_color_code;
         await programType.save();
 
         res.json(
