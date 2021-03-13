@@ -9,7 +9,7 @@ function list(payload) {
             slug: article.slug,
             title: article.title,
             category_name: article.category?.name,
-            category_button_color_code: category?.button_color_code,
+            category_button_color_code: article.category?.button_color_code,
             image_url: article.image_url,
             truncated_content: article.content.substring(0,130) + '...',
         }
@@ -22,7 +22,7 @@ function detail(payload) {
         slug: payload.slug,
         title: payload.title,
         category_name: payload.category?.name,
-        category_button_color_code: category?.button_color_code,
+        category_button_color_code: article.category?.button_color_code,
         publisher_name: payload.publisher.name,
         image_url: payload.image_url,
         content: payload.content,
