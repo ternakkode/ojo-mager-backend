@@ -10,6 +10,18 @@ module.exports = {
       name: {
         allowNull: false,
         type: Sequelize.STRING(100)
+      },
+      button_color_code: {
+        allowNull: false,
+        type: Sequelize.STRING(6)
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE
       }
     });
   },
