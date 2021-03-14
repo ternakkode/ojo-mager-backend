@@ -4,7 +4,7 @@ const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
 const generateSlug = require('../../../utils/slug');
 const programTransformer = require('../../../helpers/transformer/program');
 const wording = require('../../../utils/wording');
-const { getNextPage, getPreviousPage } = require('../../../helpers/paginate');
+const { getOffset, getNextPage, getPreviousPage } = require('../../../helpers/paginate');
 const { Op, Sequelize } = require('sequelize');
 const { Program, ProgramType, Tool } = require('../../../database/models');
 const { successApi } = require('../../../utils/response');
@@ -48,6 +48,7 @@ const index = async (req, res, next) => {
         let program = [];
         if (isPaginated ) {
             const currentPage = parseInt(page) || 1;
+            const currentLimit = parseInt(limit) || 9;
 
             if (title || type) {
                 params.where = {
@@ -58,21 +59,20 @@ const index = async (req, res, next) => {
                 if (type) params.where[Op.and].push({ '$type.name$': type });
             }
     
-            if (limit) {
-                params.limit = limit;
-            }
+            params.limit = currentLimit;
+            params.offset = getOffset(currentPage, currentLimit);
 
             let {count, rows} = await Program.findAndCountAll(params);
             rows = programTransformer.list(rows);
             
             program = {
-                totalPage: Math.ceil(count / limit),
-                 previousPage: getPreviousPage(currentPage),
-                 currentPage: currentPage,
-                 nextPage: getNextPage(currentPage, limit, count),
-                 total: count,
-                 limit: parseInt(limit),
-                 data: rows
+                totalPage: Math.ceil(count / currentLimit),
+                previousPage: getPreviousPage(currentPage),
+                currentPage: currentPage,
+                nextPage: getNextPage(currentPage, currentLimit, count),
+                total: count,
+                limit: currentLimit,
+                data: rows
              }
         } else {
             if (title || type) {

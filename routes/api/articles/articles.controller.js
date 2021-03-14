@@ -5,7 +5,7 @@ const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
 const articleTransformer = require('../../../helpers/transformer/article');
 const generateSlug = require('../../../utils/slug');
 const wording = require('../../../utils/wording');
-const { getNextPage, getPreviousPage } = require('../../../helpers/paginate');
+const { getOffset, getNextPage, getPreviousPage } = require('../../../helpers/paginate');
 
 const { Article, ArticleCategory, User } = require('../../../database/models')
 const { successApi } = require('../../../utils/response')
@@ -53,6 +53,7 @@ const index = async (req, res, next) => {
         let article = [];
         if (isPaginated) {
             const currentPage = parseInt(page) || 1;
+            const currentLimit = parseInt(limit) || 9;
 
             if (title || category) {
                 params.where = {
@@ -62,22 +63,21 @@ const index = async (req, res, next) => {
                 if(title) params.where[Op.and].push({title: { [Op.iLike]: `%${title}%`}});
                 if(category) params.where[Op.and].push({'$category.name$': category})
             }
-    
-            if (limit) {
-                params.limit = limit;
-            }
+            
+            params.limit = currentLimit;
+            params.offset = getOffset(currentPage, currentLimit);
 
             let {count, rows} = await Article.findAndCountAll(params);
             rows = articleTransformer.list(rows);
             
             article = {
-                totalPage: Math.ceil(count / limit),
-                 previousPage: getPreviousPage(currentPage),
-                 currentPage: currentPage,
-                 nextPage: getNextPage(currentPage, limit, count),
-                 total: count,
-                 limit: parseInt(limit),
-                 data: rows
+                totalPage: Math.ceil(count / currentLimit),
+                previousPage: getPreviousPage(currentPage),
+                currentPage: currentPage,
+                nextPage: getNextPage(currentPage, currentLimit, count),
+                total: count,
+                limit: currentLimit,
+                data: rows
              }
         } else {
             if (title || category) {
