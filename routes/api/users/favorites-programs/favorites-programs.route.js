@@ -1,6 +1,9 @@
 const favoritesProgramsRoute = require('express').Router();
 const favoritesProgramsController = require('./favorites-programs.controller');
 
+const usersValidationRule = require('../../../../helpers/validation/rules/users');
+const requestValidationMiddleware = require('../../../../middleware/requestValidation');
+
 const jwtMiddleware = require('../../../../middleware/jwtPassport');
 const isVerified = require('../../../../middleware/isVerified');
 
@@ -14,6 +17,8 @@ favoritesProgramsRoute.get(
     '/',
     jwtMiddleware,
     isVerified,
+    usersValidationRule.favoritesProgram,
+    requestValidationMiddleware,
     favoritesProgramsController.getFavoritesPrograms
 );
 favoritesProgramsRoute.delete(

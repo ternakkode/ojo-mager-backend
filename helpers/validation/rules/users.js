@@ -1,4 +1,4 @@
-const { body } = require('express-validator');
+const { query, body } = require('express-validator');
 
 const { User } = require('../../../database/models');
 const wording = require('../../../utils/wording');
@@ -70,6 +70,10 @@ const verifyVerification = [
     body('code').notEmpty().withMessage(wording.IS_EMPTY).bail()
 ];
 
+const favoritesProgram = [
+    query('isPaginated').toBoolean()
+];
+
 
 module.exports = {
     editProfile,
@@ -79,5 +83,6 @@ module.exports = {
     validateForgotPassword,
     saveForgotPassword,
     newVerificationAccount,
-    verifyVerification
+    verifyVerification,
+    favoritesProgram
 };
