@@ -4,7 +4,7 @@ const ApiErrorHandler = require('../../../../helpers/ApiErrorHandler');
 const programTransformer = require('../../../../helpers/transformer/program');
 const wording = require('../../../../utils/wording');
 const { User, Program, ProgramType } = require('../../../../database/models')
-const { getNextPage, getPreviousPage } = require('../../../../helpers/paginate');
+const { getOffset, getNextPage, getPreviousPage } = require('../../../../helpers/paginate');
 const { successApi } = require('../../../../utils/response');
 
 const addFavoritesPrograms = async (req, res, next) => {
@@ -69,50 +69,42 @@ const getFavoritesPrograms = async (req, res, next) => {
                     model: User,
                     as: 'users',
                     required: true,
+                    where: {
+                        id: user.id
+                    }
                 }
             ],
+            where: {
+                [Op.and]: []
+            }
         }
 
         let program = [];
         if (isPaginated) {
             const currentPage = parseInt(page) || 1;
+            const currentLimit = parseInt(limit) || 9;
 
-            params.where = {
-                [Op.and]: [
-                    // {'user_id': user.id}
-                ]
-            }
-
-            if (title || type) {
-                if (title) params.where[Op.and].push({ title: { [Op.iLike]: `%${title}%` } });
-                if (type) params.where[Op.and].push({ '$type.name$': type });
-            }
-    
-            if (limit) {
-                params.limit = limit;
-            }
-
+            if (title) params.where[Op.and].push({ title: { [Op.iLike]: `%${title}%` } });
+            if (type) params.where[Op.and].push({ '$type.name$': type });
+            
+            params.limit = currentLimit;
+            params.offset = getOffset(currentPage, currentLimit);
+            
             let {count, rows} = await Program.findAndCountAll(params);
             rows = programTransformer.list(rows);
             
             program = {
-                totalPage: Math.ceil(count / limit),
+                totalPage: Math.ceil(count / currentLimit),
                  previousPage: getPreviousPage(currentPage),
                  currentPage: currentPage,
-                 nextPage: getNextPage(currentPage, limit, count),
+                 nextPage: getNextPage(currentPage, currentLimit, count),
                  total: count,
-                 limit: parseInt(limit),
+                 limit: currentLimit,
                  data: rows
              }
-        } else {
-            if (title || type) {
-                params.where = {
-                    [Op.and]: [] 
-                }
-    
-                if (title) params.where[Op.and].push({ title: { [Op.iLike]: `%${title}%` } });
-                if (type) params.where[Op.and].push({ '$type.name$': type });
-            }
+        } else { 
+            if (title) params.where[Op.and].push({ title: { [Op.iLike]: `%${title}%` } });
+            if (type) params.where[Op.and].push({ '$type.name$': type });
     
             const programs = await user.getPrograms(params)
     
