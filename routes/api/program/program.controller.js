@@ -4,6 +4,7 @@ const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
 const generateSlug = require('../../../utils/slug');
 const programTransformer = require('../../../helpers/transformer/program');
 const wording = require('../../../utils/wording');
+const { getNextPage, getPreviousPage } = require('../../../helpers/paginate');
 const { Op, Sequelize } = require('sequelize');
 const { Program, ProgramType, Tool } = require('../../../database/models');
 const { successApi } = require('../../../utils/response');
@@ -35,7 +36,7 @@ const create = async (req, res, next) => {
 
 const index = async (req, res, next) => {
     try {
-        const { title, type, limit, isRandom } = req.query;
+        let { title, type, page, limit, isPaginated, isRandom } = req.query;
 
         let params = {
             include: {
@@ -44,31 +45,65 @@ const index = async (req, res, next) => {
             },
         }
 
-        if (title || type) {
-            params.where = {
-                [Op.and]: []
+        let program = [];
+        if (isPaginated ) {
+            const currentPage = parseInt(page) || 1;
+
+            if (title || type) {
+                params.where = {
+                    [Op.and]: []
+                }
+    
+                if (title) params.where[Op.and].push({ title: { [Op.iLike]: `%${title}%` } });
+                if (type) params.where[Op.and].push({ '$type.name$': type });
+            }
+    
+            if (limit) {
+                params.limit = limit;
             }
 
-            if (title) params.where[Op.and].push({ title: { [Op.iLike]: `%${title}%` } });
-            if (type) params.where[Op.and].push({ '$type.name$': type });
+            let {count, rows} = await Program.findAndCountAll(params);
+            rows = programTransformer.list(rows);
+            
+            program = {
+                totalPage: Math.ceil(count / limit),
+                 previousPage: getPreviousPage(currentPage),
+                 currentPage: currentPage,
+                 nextPage: getNextPage(currentPage, limit, count),
+                 total: count,
+                 limit: parseInt(limit),
+                 data: rows
+             }
+        } else {
+            if (title || type) {
+                params.where = {
+                    [Op.and]: []
+                }
+    
+                if (title) params.where[Op.and].push({ title: { [Op.iLike]: `%${title}%` } });
+                if (type) params.where[Op.and].push({ '$type.name$': type });
+            }
+    
+            if (limit) {
+                params.limit = limit;
+            }
+    
+            if (isRandom) {
+                params.order = Sequelize.literal('random()')
+            }
+    
+            const programs = await Program.findAll(params);
+    
+            if (programs.lenght == 0) {
+                throw new ApiErrorHandler(404, wording.PROGRAM_NOT_FOUND);
+            }
+
+            program = programTransformer.list(programs);
         }
 
-        if (limit) {
-            params.limit = limit;
-        }
-
-        if (isRandom) {
-            params.order = Sequelize.literal('random()')
-        }
-
-        const programs = await Program.findAll(params);
-
-        if (programs.lenght == 0) {
-            throw new ApiErrorHandler(404, wording.PROGRAM_NOT_FOUND);
-        }
 
         res.json(
-            successApi("sucessfully get program data", programTransformer.list(programs))
+            successApi("sucessfully get program data", program)
         );
     } catch (err) {
         next(err);

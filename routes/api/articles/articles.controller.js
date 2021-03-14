@@ -5,6 +5,7 @@ const ApiErrorHandler = require('../../../helpers/ApiErrorHandler');
 const articleTransformer = require('../../../helpers/transformer/article');
 const generateSlug = require('../../../utils/slug');
 const wording = require('../../../utils/wording');
+const { getNextPage, getPreviousPage } = require('../../../helpers/paginate');
 
 const { Article, ArticleCategory, User } = require('../../../database/models')
 const { successApi } = require('../../../utils/response')
@@ -34,10 +35,10 @@ const create = async (req, res, next) => {
 
 const index = async (req, res, next) => {
     try {
-        const { title, category, limit, isRandom } = req.query;
+        const { title, category, page, limit, isPaginated, isRandom } = req.query;
         
         let params = {}
-        
+
         params.include = [
             {
                 model: ArticleCategory,
@@ -49,31 +50,64 @@ const index = async (req, res, next) => {
             }          
         ]
 
-        if (title || category) {
-            params.where = {
-                [Op.and]: []
+        let article = [];
+        if (isPaginated) {
+            const currentPage = parseInt(page) || 1;
+
+            if (title || category) {
+                params.where = {
+                    [Op.and]: []
+                }
+    
+                if(title) params.where[Op.and].push({title: { [Op.iLike]: `%${title}%`}});
+                if(category) params.where[Op.and].push({'$category.name$': category})
+            }
+    
+            if (limit) {
+                params.limit = limit;
             }
 
-            if(title) params.where[Op.and].push({title: { [Op.iLike]: `%${title}%`}});
-            if(category) params.where[Op.and].push({'$category.name$': category})
-        }
+            let {count, rows} = await Article.findAndCountAll(params);
+            rows = articleTransformer.list(rows);
+            
+            article = {
+                totalPage: Math.ceil(count / limit),
+                 previousPage: getPreviousPage(currentPage),
+                 currentPage: currentPage,
+                 nextPage: getNextPage(currentPage, limit, count),
+                 total: count,
+                 limit: parseInt(limit),
+                 data: rows
+             }
+        } else {
+            if (title || category) {
+                params.where = {
+                    [Op.and]: []
+                }
+    
+                if(title) params.where[Op.and].push({title: { [Op.iLike]: `%${title}%`}});
+                if(category) params.where[Op.and].push({'$category.name$': category})
+            }
+    
+            if (limit) {
+                params.limit = limit;
+            }
+    
+            if (isRandom) {
+                params.order = Sequelize.literal('random()')
+            }
+    
+            const articles = await Article.findAll(params);
+    
+            if (articles.length == 0) {
+                throw new ApiErrorHandler(404, wording.ARTICLE_NOT_FOUND);
+            }
 
-        if (limit) {
-            params.limit = limit;
-        }
-
-        if (isRandom) {
-            params.order = Sequelize.literal('random()')
-        }
-
-        const articles = await Article.findAll(params);
-
-        if (articles.length == 0) {
-            throw new ApiErrorHandler(404, wording.ARTICLE_NOT_FOUND);
+            article = articleTransformer.list(articles)
         }
 
         res.json(
-            successApi("sucessfully get article data", articleTransformer.list(articles))
+            successApi("sucessfully get article data", article)
         );
     } catch (err) {
         next(err);

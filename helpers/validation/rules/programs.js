@@ -6,7 +6,8 @@ const generateSlug = require('../../../utils/slug');
 const wording = require('../../../utils/wording');
 
 const index = [
-    query('isRandom').toBoolean()
+    query('isRandom').toBoolean(),
+    query('isPaginated').toBoolean()
 ];
 
 const create = [
