@@ -180,7 +180,7 @@ const remove = async (req, res, next) => {
             throw new ApiErrorHandler(404, wording.ARTICLE_NOT_FOUND);
         }
 
-        await article.destory();
+        await article.destroy();
 
         res.json(
             successApi('sucessfully delete article data', article)
