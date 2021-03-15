@@ -3,13 +3,18 @@ const wording = require('./../utils/wording');
 
 const verifyRoles = (roles) => {
     return (req, res, next) => {
-        const { role } = req.user;
-        
-        if(!roles.includes(role)){
-            throw new ApiErrorHandler(403, wording.ROLE_NOT_ALLOWED)
+        try {
+            const { role } = req.user;
+
+            if(!roles.includes(role)){
+                throw new ApiErrorHandler(403, wording.ROLE_NOT_ALLOWED)
+            }
+
+            next();
+        } catch (err) {
+            next(err);
         }
 
-        next();
     }
 }
 
